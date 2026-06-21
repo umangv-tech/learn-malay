@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import confetti from 'canvas-confetti';
-import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle, PenTool, CheckCircle2, RotateCcw, Star, Target, Download } from 'lucide-react';
+import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle, PenTool, CheckCircle2, RotateCcw, Star, Target, Download, Users, Lock, Unlock, Cloud, CloudOff, Settings } from 'lucide-react';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const BASE_VOCAB = [
   { id: 1, category: 'Essentials', malay: 'Selamat Pagi', english: 'Good Morning', pronunciation: 'suh-LAH-maht PAH-gee', exampleMalay: 'Selamat pagi, boss! Apa khabar hari ini?', exampleEnglish: 'Good morning, boss! How are you today?' },
@@ -59,6 +61,7 @@ const PRACTICE_SENTENCES = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR | BINA_AYAT
+  const [activeProfile, setActiveProfile] = useState(() => localStorage.getItem('malay_active_prof') || 'UMANG'); // UMANG | WIFE
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [flippedCards, setFlippedCards] = useState({});
   
@@ -134,7 +137,7 @@ export default function App() {
   const incrementDaily = () => {
     setDailyGoal(prev => {
       const next = prev + 1;
-      localStorage.setItem('malay_daily', JSON.stringify({ date: todayStr, count: next }));
+      localStorage.setItem(`malay_daily_${activeProfile}`, JSON.stringify({ date: todayStr, count: next }));
       if (next === 10) confetti({ particleCount: 80, spread: 100, origin: { y: 0.3 } });
       return next;
     });
@@ -143,7 +146,7 @@ export default function App() {
   const toggleStar = (id) => {
     setStarredIds(prev => {
       const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      localStorage.setItem('malay_starred', JSON.stringify(next));
+      localStorage.setItem(`malay_starred_${activeProfile}`, JSON.stringify(next));
       return next;
     });
   };
@@ -162,21 +165,38 @@ export default function App() {
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const link = document.createElement('a');
     link.setAttribute('href', encodeURI(csvContent));
-    link.setAttribute('download', `Bahasa_Melayu_Vocabulary_${todayStr}.csv`);
+    link.setAttribute('download', `Bahasa_Melayu_Vocabulary_${activeProfile}_${todayStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     confetti({ particleCount: 40, spread: 70, origin: { y: 0.2 } });
   };
 
+  // Switch profile data loader
   useEffect(() => {
-    const customOnly = vocabList.filter(v => v.isAI);
-    localStorage.setItem('malay_ai_vocab', JSON.stringify(customOnly));
-  }, [vocabList]);
+    const pk = `_${activeProfile}`;
+    const savedAIWords = localStorage.getItem(`malay_ai_vocab${pk}`);
+    if (savedAIWords) {
+      try { setVocabList([...JSON.parse(savedAIWords), ...BASE_VOCAB]); }
+      catch { setVocabList(BASE_VOCAB); }
+    } else { setVocabList(BASE_VOCAB); }
+
+    const savedXp = localStorage.getItem(`malay_xp${pk}`);
+    setXp(savedXp !== null ? parseInt(savedXp, 10) : (activeProfile === 'UMANG' ? 150 : 0));
+    setStarredIds(JSON.parse(localStorage.getItem(`malay_starred${pk}`) || '[]'));
+
+    const savedDaily = JSON.parse(localStorage.getItem(`malay_daily${pk}`) || '{}');
+    setDailyGoal(savedDaily.date === todayStr ? savedDaily.count : 0);
+  }, [activeProfile, todayStr]);
 
   useEffect(() => {
-    localStorage.setItem('malay_xp', xp.toString());
-  }, [xp]);
+    const customOnly = vocabList.filter(v => v.isAI);
+    localStorage.setItem(`malay_ai_vocab_${activeProfile}`, JSON.stringify(customOnly));
+  }, [vocabList, activeProfile]);
+
+  useEffect(() => {
+    localStorage.setItem(`malay_xp_${activeProfile}`, xp.toString());
+  }, [xp, activeProfile]);
 
   useEffect(() => {
     if (vocabList.length > 0) {
@@ -493,7 +513,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             <span className="flag-badge">🇲🇾</span>
             <span>Bahasa Melayu</span>
           </h1>
-          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap'}}>
             <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
             <span style={{opacity: 0.3}}>|</span>
             <button 
@@ -503,6 +523,20 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             >
               <Download size={12} />
               <span>Export CSV</span>
+            </button>
+            <span style={{opacity: 0.3}}>|</span>
+            <button 
+              onClick={() => {
+                const next = activeProfile === 'UMANG' ? 'WIFE' : 'UMANG';
+                setActiveProfile(next);
+                localStorage.setItem('malay_active_prof', next);
+                confetti({ particleCount: 30, spread: 60, origin: { y: 0.2 } });
+              }}
+              style={{background: 'var(--pill-bg)', border: '1px solid var(--glass-border)', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', color: activeProfile === 'UMANG' ? '#00d2c4' : '#f59e0b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'}}
+              title="Switch family profile"
+            >
+              <Users size={12} />
+              <span>Profile: {activeProfile === 'UMANG' ? '👨 Umang' : '👩 Wife'}</span>
             </button>
           </div>
         </div>
