@@ -508,14 +508,11 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
 
   return (
     <div className="app-shell">
-      {/* Dynamic Family Profile Island Ribbon Banner */}
-      <div style={{background: activeProfile === 'UMANG' ? 'linear-gradient(90deg, #090e17, #0d9488)' : 'linear-gradient(90deg, #380a1e, #be123c)', padding: '12px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.18)', transition: 'all 0.35s ease'}}>
-        <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-          <span style={{fontSize: '24px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
-          <div>
-            <span style={{fontSize: '10px', textTransform: 'uppercase', opacity: 0.85, display: 'block', letterSpacing: '1px', fontWeight: '900'}}>Active Learner Profile</span>
-            <span style={{fontSize: '17px', fontWeight: '950', color: activeProfile === 'UMANG' ? '#00d2c4' : '#fbcfe8'}}>{activeProfile === 'UMANG' ? "Umang's Studio" : "Archana's Studio"}</span>
-          </div>
+      {/* Subtle Apple macOS Menu Status Ribbon */}
+      <div style={{background: activeProfile === 'UMANG' ? '#090e17' : '#121113', padding: '6px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid var(--glass-border)', transition: 'all 0.35s ease'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)'}}>
+          <span>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
+          <span>Workspace: <strong style={{color: 'var(--text-main)'}}>{activeProfile === 'UMANG' ? "Umang" : "Archana"}</strong></span>
         </div>
 
         <button 
@@ -523,13 +520,12 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             const next = activeProfile === 'UMANG' ? 'ARCHANA' : 'UMANG';
             setActiveProfile(next);
             localStorage.setItem('malay_active_prof', next);
-            confetti({ particleCount: 50, spread: 70, origin: { y: 0.1 } });
+            confetti({ particleCount: 35, spread: 50, origin: { y: 0.1 } });
           }}
-          style={{background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.4)', padding: '8px 18px', borderRadius: '999px', color: '#fff', fontWeight: '950', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'}}
-          title="Click to switch between Umang and Archana"
+          style={{background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'underline', opacity: 0.85, padding: 0}}
+          title="Switch active profile"
         >
-          <Users size={14} />
-          <span>Switch to {activeProfile === 'UMANG' ? '👩 Archana' : '👨 Umang'}</span>
+          <span>⇄ Switch to {activeProfile === 'UMANG' ? 'Archana' : 'Umang'}</span>
         </button>
       </div>
 
