@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import confetti from 'canvas-confetti';
-import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle, PenTool, CheckCircle2, RotateCcw } from 'lucide-react';
+import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle, PenTool, CheckCircle2, RotateCcw, Star, Target, Download } from 'lucide-react';
 
 const BASE_VOCAB = [
   { id: 1, category: 'Essentials', malay: 'Selamat Pagi', english: 'Good Morning', pronunciation: 'suh-LAH-maht PAH-gee', exampleMalay: 'Selamat pagi, boss! Apa khabar hari ini?', exampleEnglish: 'Good morning, boss! How are you today?' },
@@ -120,6 +120,55 @@ export default function App() {
   const [doctorFeedback, setDoctorFeedback] = useState(null);
   const [doctorError, setDoctorError] = useState('');
 
+  // Feature 1: Starred Hard Words Focus Deck
+  const [starredIds, setStarredIds] = useState(() => JSON.parse(localStorage.getItem('malay_starred') || '[]'));
+  const [quizFilter, setQuizFilter] = useState('ALL'); // ALL | STARRED
+
+  // Feature 3: Daily Word Goal (X / 10 Quizzes Today)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [dailyGoal, setDailyGoal] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('malay_daily') || '{}');
+    return saved.date === todayStr ? saved.count : 0;
+  });
+
+  const incrementDaily = () => {
+    setDailyGoal(prev => {
+      const next = prev + 1;
+      localStorage.setItem('malay_daily', JSON.stringify({ date: todayStr, count: next }));
+      if (next === 10) confetti({ particleCount: 80, spread: 100, origin: { y: 0.3 } });
+      return next;
+    });
+  };
+
+  const toggleStar = (id) => {
+    setStarredIds(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+      localStorage.setItem('malay_starred', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Feature 4: 1-Click Spreadsheet CSV Export
+  const handleExportCsv = () => {
+    const headers = ['Malay Word', 'English Meaning', 'Category', 'Phonetic Guide', 'Example Sentence Malay', 'Example Sentence English'];
+    const rows = vocabList.map(v => [
+      `"${(v.malay || '').replace(/"/g, '""')}"`,
+      `"${(v.english || '').replace(/"/g, '""')}"`,
+      `"${(v.category || '').replace(/"/g, '""')}"`,
+      `"${(v.pronunciation || '').replace(/"/g, '""')}"`,
+      `"${(v.exampleMalay || '').replace(/"/g, '""')}"`,
+      `"${(v.exampleEnglish || '').replace(/"/g, '""')}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `Bahasa_Melayu_Vocabulary_${todayStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    confetti({ particleCount: 40, spread: 70, origin: { y: 0.2 } });
+  };
+
   useEffect(() => {
     const customOnly = vocabList.filter(v => v.isAI);
     localStorage.setItem('malay_ai_vocab', JSON.stringify(customOnly));
@@ -131,11 +180,16 @@ export default function App() {
 
   useEffect(() => {
     if (vocabList.length > 0) {
-      const shuffled = [...vocabList].sort(() => 0.5 - Math.random());
+      const activeSource = quizFilter === 'STARRED' 
+        ? vocabList.filter(v => starredIds.includes(v.id))
+        : vocabList;
+
+      const base = activeSource.length > 0 ? activeSource : vocabList;
+      const shuffled = [...base].sort(() => 0.5 - Math.random());
       setQuizDeck(shuffled);
       setQuizStep(0);
     }
-  }, [vocabList]);
+  }, [vocabList, quizFilter, starredIds]);
 
   const currentQuizItem = quizDeck[quizStep];
 
@@ -190,6 +244,7 @@ export default function App() {
       if (fullSentence === targetSentence) {
         setIsScrambleSolved(true);
         setXp(x => x + 30);
+        incrementDaily();
         confetti({ particleCount: 65, spread: 80, origin: { y: 0.6 } });
         speakMalay(null, currentScramble.words.join(' '));
       }
@@ -396,13 +451,18 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
     if (item.id === currentQuizItem.id) {
       setQuizScore(s => s + 1);
       setXp(x => x + 25);
+      incrementDaily();
       confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 } });
     }
   };
 
   const handleNextQuestion = () => {
     if (quizStep + 1 >= quizDeck.length) {
-      const reshuffled = [...vocabList].sort(() => 0.5 - Math.random());
+      const activeSource = quizFilter === 'STARRED' 
+        ? vocabList.filter(v => starredIds.includes(v.id))
+        : vocabList;
+      const base = activeSource.length > 0 ? activeSource : vocabList;
+      const reshuffled = [...base].sort(() => 0.5 - Math.random());
       setQuizDeck(reshuffled);
       setQuizStep(0);
     } else {
@@ -440,12 +500,30 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
 
         <div className="stats-bar">
           <button 
+            onClick={handleExportCsv}
+            className="theme-toggle-btn"
+            style={{color: 'var(--accent-secondary)'}}
+            title="Export dictionary to Excel/CSV"
+          >
+            <Download size={16} />
+            <span>Export CSV</span>
+          </button>
+
+          <button 
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             className="theme-toggle-btn"
           >
             {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
             <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
+
+          <div className="stat-chip">
+            <Target size={20} color="#10b981" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Daily Goal</span>
+              <span className="stat-num" style={{color: dailyGoal >= 10 ? '#10b981' : 'var(--text-main)'}}>{Math.min(dailyGoal, 10)}/10 {dailyGoal >= 10 ? '✓' : ''}</span>
+            </div>
+          </div>
 
           <div className="stat-chip">
             <Flame size={20} color="var(--accent-secondary)" />
@@ -596,21 +674,29 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
           </div>
 
           {/* Minimalist Master Category Filter Pills */}
-          <div className="category-pills">
+          <div className="category-pills" style={{alignItems: 'center'}}>
             {masterBuckets.map(cat => (
               <button 
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`cat-pill ${selectedCategory === cat ? 'active' : ''}`}
+                onClick={() => { setSelectedCategory(cat); setQuizFilter('ALL'); }}
+                className={`cat-pill ${selectedCategory === cat && quizFilter === 'ALL' ? 'active' : ''}`}
               >
                 {cat === 'ALL' ? '🌟 All Words' : cat}
               </button>
             ))}
+
+            <button 
+              onClick={() => setQuizFilter(f => f === 'ALL' ? 'STARRED' : 'ALL')}
+              className={`cat-pill ${quizFilter === 'STARRED' ? 'active' : ''}`}
+              style={{borderColor: '#f59e0b', color: quizFilter === 'STARRED' ? '#000' : '#f59e0b', background: quizFilter === 'STARRED' ? '#f59e0b' : 'transparent', fontWeight: '950'}}
+            >
+              ⭐ Hard / Starred ({starredIds.length})
+            </button>
           </div>
 
           {/* Flashcards Grid */}
           <div className="flashcards-grid">
-            {filteredVocab.map(card => (
+            {(quizFilter === 'STARRED' ? filteredVocab.filter(v => starredIds.includes(v.id)) : filteredVocab).map(card => (
               <div 
                 key={card.id}
                 onClick={() => toggleFlip(card.id)}
@@ -620,6 +706,13 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
                   <div className="flip-card-front">
                     <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn" title="Listen pronunciation">
                       <Volume2 size={18} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleStar(card.id); }} 
+                      style={{position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10, padding: '4px'}}
+                      title={starredIds.includes(card.id) ? "Unstar word" : "Star word as hard"}
+                    >
+                      <Star size={20} fill={starredIds.includes(card.id) ? "#f59e0b" : "none"} color={starredIds.includes(card.id) ? "#f59e0b" : "var(--text-muted)"} />
                     </button>
                     <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', display: 'block'}}>
                       {card.category}
