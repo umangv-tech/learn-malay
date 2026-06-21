@@ -1,7 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Solid Ultra-Bright Electric Cyan Squircle Base (Pops on both Dark & Light browser tabs) -->
-  <rect width="512" height="512" rx="136" fill="#00d2c4"/>
+  <defs>
+    <!-- Deep Jungle Emerald Green Base (Pops on light & dark tabs) -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <!-- Vibrant Scarlet Red Bunga Raya Petal Gradient -->
+    <linearGradient id="petal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="50%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#9f1239"/>
+    </linearGradient>
+    <!-- Glowing Malacca Gold Stamen -->
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
   
-  <!-- Giant, Fat, High-Contrast Black 'BM' Typography (100% readable even at 16x16 pixels) -->
-  <text x="256" y="365" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Arial, sans-serif" font-size="370" font-weight="950" fill="#090e17" text-anchor="middle" letter-spacing="-18">BM</text>
+  <!-- Apple iOS Squircle Base -->
+  <rect width="512" height="512" rx="140" fill="url(#bg)"/>
+  <rect width="480" height="480" x="16" y="16" rx="124" fill="none" stroke="#34d399" stroke-width="8" stroke-opacity="0.3"/>
+  
+  <!-- 5 Scarlet Red Hibiscus Petals (Malaysia's National Flower: Bunga Raya) -->
+  <g transform="translate(256, 270)">
+    <!-- Top Left Petal -->
+    <circle cx="-75" cy="-80" r="100" fill="url(#petal)"/>
+    <!-- Top Right Petal -->
+    <circle cx="75" cy="-80" r="100" fill="url(#petal)"/>
+    <!-- Bottom Left Petal -->
+    <circle cx="-100" cy="45" r="100" fill="url(#petal)"/>
+    <!-- Bottom Right Petal -->
+    <circle cx="100" cy="45" r="100" fill="url(#petal)"/>
+    <!-- Bottom Center Petal -->
+    <circle cx="0" cy="110" r="100" fill="url(#petal)"/>
+    
+    <!-- Deep Crimson Flower Center Core -->
+    <circle cx="0" cy="-5" r="48" fill="#4c0519"/>
+    
+    <!-- Golden Hibiscus Stamen extending top-left -->
+    <path d="M 0 0 C -20 -70, -50 -130, -75 -180" fill="none" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
+    
+    <!-- Glowing Golden Pollen Dots at tip -->
+    <circle cx="-75" cy="-180" r="26" fill="#fef08a"/>
+    <circle cx="-45" cy="-160" r="16" fill="#fbbf24"/>
+    <circle cx="-95" cy="-150" r="18" fill="#f59e0b"/>
+  </g>
 </svg>
