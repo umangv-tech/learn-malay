@@ -510,7 +510,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
               style={{background: 'var(--pill-bg)', border: '1px solid var(--glass-border)', padding: '8px 14px', borderRadius: '16px', fontSize: '13px', fontWeight: '950', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0}}
               title="Click to flip translation direction"
             >
-              <span>{searchLang === 'MS_EN' ? '🇲🇾 MS → EN' : '🇬🇧 EN → MS'}</span>
+              <span>{searchLang === 'MS_EN' ? '🇲🇾 BM → EN' : '🇬🇧 EN → BM'}</span>
               <RotateCcw size={14} />
             </button>
 
