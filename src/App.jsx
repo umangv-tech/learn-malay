@@ -44,7 +44,7 @@ const DIALOGUES = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('VOCAB');
+  const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [flippedCards, setFlippedCards] = useState({});
   
@@ -302,11 +302,16 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
 
   return (
     <div className="app-shell">
-      {/* Apple Cupertino Minimal Header */}
+      {/* Header Banner - Royal Emerald & Malacca Gold */}
       <header className="header-banner">
         <div className="title-area">
-          <h1>Bahasa Melayu</h1>
-          <p>Active Library: {vocabList.length}</p>
+          <h1>
+            <span className="flag-badge">🇲🇾</span>
+            <span>Bahasa Melayu</span>
+          </h1>
+          <p style={{color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px'}}>
+            Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong>
+          </p>
         </div>
 
         <div className="stats-bar">
@@ -314,59 +319,69 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             className="theme-toggle-btn"
           >
-            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
             <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
 
           <div className="stat-chip">
-            <Flame size={14} color="var(--text-muted)" />
-            <span>Streak:</span> {streak}
+            <Flame size={20} color="var(--accent-secondary)" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Streak</span>
+              <span className="stat-num">{streak} Days</span>
+            </div>
           </div>
 
           <div className="stat-chip">
-            <Award size={14} color="var(--accent-blue)" />
-            <span>XP:</span> {xp}
+            <Award size={20} color="var(--accent-primary)" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>XP</span>
+              <span className="stat-num teal">{xp} XP</span>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Minimal Tabs */}
+      {/* Navigation Tabs */}
       <nav className="nav-tabs">
         <button 
           onClick={() => setActiveTab('VOCAB')} 
           className={`tab-btn ${activeTab === 'VOCAB' ? 'active' : ''}`}
         >
-          Kosa Kata
+          <BookOpen size={18} />
+          <span>Kosa Kata</span>
         </button>
 
         <button 
           onClick={() => setActiveTab('QUIZ')} 
           className={`tab-btn ${activeTab === 'QUIZ' ? 'active' : ''}`}
         >
-          Ujian
+          <Sparkles size={18} />
+          <span>Ujian</span>
         </button>
 
         <button 
           onClick={() => setActiveTab('DIALOGUE')} 
           className={`tab-btn ${activeTab === 'DIALOGUE' ? 'active' : ''}`}
         >
-          Perbualan
+          <MessageCircle size={18} />
+          <span>Perbualan</span>
         </button>
 
         <button 
           onClick={() => setActiveTab('GRAMMAR')} 
           className={`tab-btn ${activeTab === 'GRAMMAR' ? 'active' : ''}`}
         >
-          Tatabahasa
+          <HelpCircle size={18} />
+          <span>Tatabahasa</span>
         </button>
       </nav>
 
       {/* --- TAB 1: VOCABULARY --- */}
       {activeTab === 'VOCAB' && (
         <section>
-          {/* Apple Style Search Bar */}
+          {/* Minimalist Dictionary Search Bar */}
           <form onSubmit={handleDictionarySearch} className="kamus-search-box">
-            <Search size={18} color="var(--text-muted)" />
+            <Search size={22} color="var(--accent-primary)" />
             <input 
               type="text"
               value={searchQuery}
@@ -375,27 +390,30 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
               className="kamus-input"
             />
             <button type="submit" disabled={isSearching} className="kamus-search-btn">
-              {isSearching ? <Loader2 size={14} className="animate-spin" /> : 'Search'}
+              {isSearching ? <Loader2 size={18} className="animate-spin" /> : <span>Search</span>}
             </button>
           </form>
 
           {searchError && (
-            <p style={{color: '#ff3b30', fontSize: '13px', marginBottom: '16px', textAlign: 'center'}}>
-              {searchError}
+            <p style={{color: '#f43f5e', fontSize: '14px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center'}}>
+              ⚠️ {searchError}
             </p>
           )}
 
           {searchResult && (
             <div className="kamus-result-card">
-              <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
                 <button onClick={(e) => speakMalay(e, searchResult.malay)} className="audio-btn" style={{position: 'static'}}>
-                  <Volume2 size={16} />
+                  <Volume2 size={20} />
                 </button>
                 <div>
-                  <h3 style={{fontSize: '20px', fontWeight: '700', color: 'var(--text-main)'}}>
-                    {searchResult.malay} <span style={{fontWeight: 400, color: 'var(--text-muted)'}}>&rarr;</span> {searchResult.english}
+                  <span style={{fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold'}}>
+                    {searchResult.category}
+                  </span>
+                  <h3 style={{fontSize: '28px', fontWeight: '950', color: 'var(--text-main)', margin: '2px 0'}}>
+                    {searchResult.malay} &rarr; <span style={{color: 'var(--accent-primary)'}}>{searchResult.english}</span>
                   </h3>
-                  <p style={{fontFamily: 'monospace', fontSize: '13px', color: 'var(--text-muted)'}}>
+                  <p style={{fontFamily: 'monospace', fontSize: '14px', color: 'var(--text-muted)'}}>
                     {searchResult.pronunciation}
                   </p>
                 </div>
@@ -403,24 +421,25 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
 
               {searchResult.isNewSearch && (
                 <button onClick={handleAddSearchResultToDeck} className="add-deck-btn">
-                  <PlusCircle size={15} style={{marginRight: '6px', verticalAlign: '-2px'}} />
-                  Add to Deck
+                  <PlusCircle size={20} />
+                  <span>+ Add to Deck</span>
                 </button>
               )}
             </div>
           )}
 
-          {/* Minimal AI Action Card */}
+          {/* AI Generator Banner */}
           <div className="ai-action-card">
             <div className="ai-card-info">
+              <Sparkles size={32} color="var(--accent-secondary)" />
               <div>
                 <h3>Generate Vocabulary</h3>
-                <p>Curate 10 words with AI</p>
+                <p style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px'}}>Curate 10 words with AI</p>
               </div>
             </div>
 
             <button onClick={() => setIsAiModalOpen(true)} className="ai-btn">
-              <Plus size={16} />
+              <Plus size={20} />
               <span>Generate</span>
             </button>
           </div>
@@ -448,18 +467,18 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
               >
                 <div className="flip-card-inner">
                   <div className="flip-card-front">
-                    <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn">
-                      <Volume2 size={16} />
+                    <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn" title="Listen pronunciation">
+                      <Volume2 size={18} />
                     </button>
-                    <span style={{fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px'}}>
+                    <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', display: 'block'}}>
                       {card.category}
                     </span>
                     <h2 className="word-malay">{card.malay}</h2>
                   </div>
 
                   <div className="flip-card-back">
-                    <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn">
-                      <Volume2 size={16} />
+                    <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn" style={{background: 'rgba(0,0,0,0.3)'}}>
+                      <Volume2 size={18} />
                     </button>
                     <h3 className="word-eng">{card.english}</h3>
                     <div className="word-pronounce">{card.pronunciation}</div>
@@ -475,19 +494,23 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
       {activeTab === 'QUIZ' && currentQuizItem && (
         <section>
           <div className="quiz-card">
-            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px'}}>
-              <span>{quizStep + 1} of {quizDeck.length}</span>
-              <span>Score: {quizScore}</span>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+              <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase'}}>
+                Card {quizStep + 1} of {quizDeck.length}
+              </span>
+              <span style={{fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold'}}>
+                Score: {quizScore}
+              </span>
             </div>
 
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', margin: '16px 0'}}>
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', margin: '20px 0'}}>
               <h2 className="quiz-question" style={{margin: 0}}>{currentQuizItem.malay}</h2>
               <button onClick={(e) => speakMalay(e, currentQuizItem.malay)} className="audio-btn" style={{position: 'static'}}>
-                <Volume2 size={18} />
+                <Volume2 size={20} color="var(--accent-secondary)" />
               </button>
             </div>
 
-            <div className="quiz-options" style={{margin: '28px 0'}}>
+            <div className="quiz-options" style={{marginBottom: '24px'}}>
               {quizOptions.map(opt => {
                 let btnClass = '';
                 if (selectedAnswer !== null) {
@@ -511,8 +534,8 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
             {selectedAnswer !== null && (
               <div>
                 <button onClick={handleNextQuestion} className="ai-btn" style={{margin: '0 auto'}}>
-                  <span>{quizStep + 1 >= quizDeck.length ? 'Restart 🔄' : 'Next'}</span>
-                  <ArrowRight size={16} />
+                  <span>{quizStep + 1 >= quizDeck.length ? 'Reshuffle 🔄' : 'Next'}</span>
+                  <ArrowRight size={18} />
                 </button>
               </div>
             )}
@@ -525,22 +548,23 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         <section>
           {DIALOGUES.map((dlg, idx) => (
             <div key={idx} className="dialogue-box">
-              <h3 style={{fontSize: '18px', fontWeight: '600', color: 'var(--text-main)', marginBottom: '16px'}}>
+              <h3 style={{fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-secondary)', marginBottom: '20px'}}>
                 {dlg.title}
               </h3>
 
               <div>
                 {dlg.lines.map((line, lIdx) => (
                   <div key={lIdx} className="dialogue-line">
-                    <div className="speaker-avatar">{line.speaker}</div>
+                    <div className="speaker-avatar">{line.speaker.split(' ')[0]}</div>
                     <div className="dialogue-text">
-                      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <p style={{fontSize: '15px', fontWeight: '600', color: 'var(--text-main)'}}>{line.malay}</p>
-                        <button onClick={(e) => speakMalay(e, line.malay)} className="audio-btn" style={{position: 'static'}}>
-                          <Volume2 size={14} />
+                      <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '4px'}}>
+                        <span style={{fontSize: '12px', fontWeight: 'bold', color: 'var(--accent-primary)'}}>{line.speaker}</span>
+                        <button onClick={(e) => speakMalay(e, line.malay)} style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer'}}>
+                          <Volume2 size={16} />
                         </button>
                       </div>
-                      <p style={{fontSize: '13px', color: 'var(--text-muted)', marginTop: '2px'}}>{line.english}</p>
+                      <p style={{fontSize: '16px', fontWeight: 'bold', color: 'var(--text-main)'}}>{line.malay}</p>
+                      <p style={{fontSize: '13px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px'}}>{line.english}</p>
                     </div>
                   </div>
                 ))}
@@ -555,36 +579,48 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         <section className="grammar-grid">
           <div className="grammar-rule-card">
             <h3>Zero Verb Conjugations</h3>
-            <p>Verbs never change form based on tense or person. Makan means eat, ate, or eating. Add time markers like Sudah (already) or Akan (will).</p>
+            <p style={{fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6'}}>
+              Verbs never change form based on tense or person. Makan means eat, ate, or eating. Add time markers like Sudah (already) or Akan (will).
+            </p>
           </div>
 
           <div className="grammar-rule-card">
             <h3>Kata Ganda (Reduplication)</h3>
-            <p>Repeating words for plurals or emphasis. Penuh: Anak-anak (Children). Separa: Jejari (Fingers). Berentak: Kuih-muih (Cakes).</p>
+            <p style={{fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.6'}}>
+              Repeating words for plurals or emphasis.
+              <br/><br/>
+              • <strong>Penuh:</strong> Anak-anak (Children)
+              <br/>
+              • <strong>Separa:</strong> Jejari (Fingers)
+              <br/>
+              • <strong>Berentak:</strong> Kuih-muih (Cakes)
+            </p>
           </div>
 
           <div className="grammar-rule-card">
             <h3>Adjective Placement</h3>
-            <p>The noun comes before the adjective. Rumah (House) + Besar (Big) = Rumah Besar (Big House).</p>
+            <p style={{fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6'}}>
+              The noun comes before the adjective. Rumah (House) + Besar (Big) = Rumah Besar (Big House).
+            </p>
           </div>
         </section>
       )}
 
-      {/* --- AI MODAL --- */}
+      {/* --- AI GENERATION OVERLAY MODAL --- */}
       {isAiModalOpen && (
         <div className="ai-modal-backdrop">
           <div className="ai-modal-box">
             <h2>Generate Vocab</h2>
-            <p>Curate 10 conversational words</p>
+            <p style={{color: 'var(--text-muted)', fontSize: '14px', marginBottom: '24px'}}>Select theme or generate random words</p>
 
-            <div style={{marginBottom: '20px'}}>
+            <div style={{marginBottom: '22px'}}>
               <button
                 disabled={isGenerating}
                 onClick={() => handleGenerateAIWords('Random Practical Everyday Malaysian Words')}
                 className="ai-btn"
-                style={{width: '100%', justifyContent: 'center', background: 'var(--text-main)', color: 'var(--bg-main)'}}
+                style={{width: '100%', justifyContent: 'center', background: 'var(--accent-primary)', color: '#000'}}
               >
-                {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Dices size={16} />}
+                {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Dices size={20} />}
                 <span>Surprise Me (Random Words)</span>
               </button>
             </div>
@@ -597,7 +633,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
                 placeholder="Topic focus (e.g. Dining, Slang)"
               />
               <div className="quick-topics">
-                {['Kata Ganda', 'Dining', 'Office', 'Shopping', 'Greetings'].map(t => (
+                {['Kata Ganda', 'Dining', 'Office', 'Slang', 'Greetings'].map(t => (
                   <button key={t} type="button" onClick={() => setAiTopic(t)} className="topic-chip">
                     {t}
                   </button>
@@ -605,7 +641,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
               </div>
             </div>
 
-            {aiError && <p style={{color: '#ff3b30', fontSize: '13px', marginBottom: '12px'}}>{aiError}</p>}
+            {aiError && <p style={{color: '#f43f5e', fontSize: '13px', marginBottom: '16px'}}>{aiError}</p>}
 
             <div className="modal-actions">
               <button disabled={isGenerating} onClick={() => setIsAiModalOpen(false)} className="cancel-btn">
@@ -613,7 +649,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
               </button>
               
               <button disabled={isGenerating} onClick={() => handleGenerateAIWords(aiTopic)} className="ai-btn" style={{flex: 2, justifyContent: 'center'}}>
-                {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <span>Generate</span>}
+                {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <span>Generate</span>}
               </button>
             </div>
           </div>
