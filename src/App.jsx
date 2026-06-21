@@ -541,75 +541,77 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
   return (
     <div className="app-shell">
       {/* Header Banner - Royal Emerald & Malacca Gold */}
-      <header className="header-banner">
-        <div className="title-area">
-          <h1>
-            <span className="flag-badge">🇲🇾</span>
-            <span>Bahasa Melayu</span>
-          </h1>
-          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
-            <span style={{opacity: 0.3}}>|</span>
+      <header className="header-banner" style={{display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'stretch'}}>
+        {/* Top Row: Title (Left) and Profile Identity Nook (Far Right Corner) */}
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '16px'}}>
+          <div className="title-area" style={{textAlign: 'left'}}>
+            <h1 style={{margin: 0}}>
+              <span className="flag-badge">🇲🇾</span>
+              <span>Bahasa Melayu</span>
+            </h1>
+            <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
+              <span style={{opacity: 0.3}}>|</span>
+              <button 
+                onClick={handleExportCsv}
+                style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'underline', cursor: 'pointer', opacity: 0.65, padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px'}}
+                title="Export backup to Excel/CSV"
+              >
+                <Download size={12} />
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Absolute Far Right Corner Identity Portal */}
+          <div style={{marginLeft: 'auto'}}>
             <button 
-              onClick={handleExportCsv}
-              style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'underline', cursor: 'pointer', opacity: 0.65, padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px'}}
-              title="Export backup to Excel/CSV"
+              type="button"
+              onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
+              style={{background: activeProfile === 'UMANG' ? 'linear-gradient(135deg, #00d2c4, #0d9488)' : 'linear-gradient(135deg, #a855f7, #7e22ce)', color: activeProfile === 'UMANG' ? '#000' : '#fff', border: 'none', padding: '10px 22px', borderRadius: '999px', fontWeight: '950', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 6px 18px rgba(0,0,0,0.35)', transition: 'all 0.2s ease'}}
+              title="Lock workspace and return to Netflix profile selection portal"
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.04)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <Download size={12} />
-              <span>Export CSV</span>
+              <span style={{fontSize: '20px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
+              <span>{activeProfile === 'UMANG' ? 'Umang' : 'Archana'}</span>
+              <Lock size={15} style={{opacity: 0.85}} />
             </button>
           </div>
         </div>
 
-        <div style={{display: 'flex', alignItems: 'center', gap: '28px'}}>
-          <div className="stats-bar" style={{alignItems: 'center', margin: 0}}>
-            <button 
-              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-              className="theme-toggle-btn"
-            >
-              {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
-              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
-            </button>
+        {/* Bottom Row: Gamified Stats Chips (Stretching across bottom) */}
+        <div className="stats-bar" style={{width: '100%', justifyContent: 'flex-start', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '18px', margin: 0, flexWrap: 'wrap'}}>
+          <button 
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            className="theme-toggle-btn"
+          >
+            {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
+            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
 
-            <div className="stat-chip">
-              <Target size={20} color="#10b981" />
-              <div>
-                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Daily Goal</span>
-                <span className="stat-num" style={{color: dailyGoal >= 10 ? '#10b981' : 'var(--text-main)'}}>{Math.min(dailyGoal, 10)}/10 {dailyGoal >= 10 ? '✓' : ''}</span>
-              </div>
-            </div>
-
-            <div className="stat-chip">
-              <Flame size={20} color="var(--accent-secondary)" />
-              <div>
-                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Streak</span>
-                <span className="stat-num">{streak} Days</span>
-              </div>
-            </div>
-
-            <div className="stat-chip">
-              <Award size={20} color="var(--accent-primary)" />
-              <div>
-                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>XP</span>
-                <span className="stat-num teal">{xp} XP</span>
-              </div>
+          <div className="stat-chip">
+            <Target size={20} color="#10b981" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Daily Goal</span>
+              <span className="stat-num" style={{color: dailyGoal >= 10 ? '#10b981' : 'var(--text-main)'}}>{Math.min(dailyGoal, 10)}/10 {dailyGoal >= 10 ? '✓' : ''}</span>
             </div>
           </div>
 
-          {/* Dedicated Far Right Identity Nook (Executive Desktop Layout) */}
-          <div style={{borderLeft: '1px solid var(--glass-border)', paddingLeft: '24px', display: 'flex', alignItems: 'center'}}>
-            <button 
-              type="button"
-              onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
-              style={{background: activeProfile === 'UMANG' ? 'linear-gradient(135deg, #00d2c4, #0d9488)' : 'linear-gradient(135deg, #a855f7, #7e22ce)', color: activeProfile === 'UMANG' ? '#000' : '#fff', border: 'none', padding: '8px 18px', borderRadius: '999px', fontWeight: '950', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(0,0,0,0.35)', transition: 'transform 0.15s ease'}}
-              title="Lock workspace and return to Netflix profile selection portal"
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <span style={{fontSize: '18px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
-              <span>{activeProfile === 'UMANG' ? 'Umang' : 'Archana'}</span>
-              <Lock size={14} style={{opacity: 0.85}} />
-            </button>
+          <div className="stat-chip">
+            <Flame size={20} color="var(--accent-secondary)" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Streak</span>
+              <span className="stat-num">{streak} Days</span>
+            </div>
+          </div>
+
+          <div className="stat-chip">
+            <Award size={20} color="var(--accent-primary)" />
+            <div>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>XP</span>
+              <span className="stat-num teal">{xp} XP</span>
+            </div>
           </div>
         </div>
       </header>
