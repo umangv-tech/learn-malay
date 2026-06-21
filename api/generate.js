@@ -1,0 +1,62 @@
+import { GoogleGenAI } from '@google/genai';
+
+export default async function handler(req, res) {
+  // CORS & Method check
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+  }
+
+  // Vercel private server secret (Bypasses public frontend bundle!)
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ 
+      error: 'GEMINI_API_KEY missing. Please add GEMINI_API_KEY to your Vercel Project Settings -> Environment Variables.' 
+    });
+  }
+
+  const { topic = 'Everyday Conversational Words' } = req.body || {};
+
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${topic}". 
+CRITICAL GRAMMAR REQUIREMENT: Ensure at least 3 of the 10 generated words showcase classic Malaysian reduplication (Kata Ganda - such as Kata Ganda Penuh [e.g. anak-anak], Kata Ganda Separa [e.g. jejari, lelangit], or Kata Ganda Berentak [e.g. kuih-muih, gotong-royong]).
+Return ONLY a valid raw JSON array of objects. Do not include markdown formatting or backticks. 
+Each object MUST match this schema:
+{"id": number, "category": string, "malay": string, "english": string, "pronunciation": string}
+Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Dining') and pronunciation is an easy English phonetic guide.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt
+    });
+
+    let rawText = response.text || '';
+    const firstBracket = rawText.indexOf('[');
+    const lastBracket = rawText.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket !== -1) {
+      rawText = rawText.slice(firstBracket, lastBracket + 1);
+    } else {
+      rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    }
+
+    const parsedWords = JSON.parse(rawText);
+
+    if (!Array.isArray(parsedWords) || parsedWords.length === 0) {
+      throw new Error("AI returned invalid array structure.");
+    }
+
+    // Attach unique server timestamps
+    const words = parsedWords.map((w, idx) => ({
+      ...w,
+      id: Date.now() + idx,
+      isAI: true
+    }));
+
+    return res.status(200).json({ words });
+  } catch (error) {
+    console.error("Vercel Serverless AI Proxy Error:", error);
+    return res.status(500).json({ 
+      error: error.message || 'Failed generating words via Vercel server proxy.' 
+    });
+  }
+}
