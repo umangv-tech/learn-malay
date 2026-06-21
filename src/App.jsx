@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import confetti from 'canvas-confetti';
-import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, CheckCircle2, XCircle, Flame, ArrowRight, RefreshCw, Plus, Dices, Loader2 } from 'lucide-react';
+import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, CheckCircle2, XCircle, Flame, ArrowRight, RefreshCw, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle } from 'lucide-react';
 
 const BASE_VOCAB = [
   { id: 1, category: 'Essentials', malay: 'Selamat Pagi', english: 'Good Morning', pronunciation: 'suh-LAH-maht PAH-gee' },
@@ -48,6 +48,15 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [flippedCards, setFlippedCards] = useState({});
   
+  // Theme state (dark vs light)
+  const [theme, setTheme] = useState(() => localStorage.getItem('malay_theme') || 'dark');
+
+  // Sync theme to DOM
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('malay_theme', theme);
+  }, [theme]);
+
   // Dynamic Vocab List (Loads custom AI words from localStorage)
   const [vocabList, setVocabList] = useState(() => {
     const savedAIWords = localStorage.getItem('malay_ai_vocab');
@@ -67,6 +76,12 @@ export default function App() {
   const [aiTopic, setAiTopic] = useState('Everyday Conversational Words');
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
+
+  // Kamus Dictionary Search State (100% Free!)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResult, setSearchResult] = useState(null);
+  const [searchError, setSearchError] = useState('');
 
   // Gamification XP & Non-Repeating Shuffled Quiz State
   const [xp, setXp] = useState(() => parseInt(localStorage.getItem('malay_xp') || '0', 10));
@@ -126,6 +141,75 @@ export default function App() {
     if (!flippedCards[id]) {
       setXp(x => x + 5);
     }
+  };
+
+  // --- 100% FREE KAMUS DICTIONARY LOOKUP ENGINE ---
+  const handleDictionarySearch = async (e) => {
+    e?.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    const term = searchQuery.trim().toLowerCase();
+    setIsSearching(true);
+    setSearchError('');
+    setSearchResult(null);
+
+    try {
+      // 1. Instant check in active flashcard deck (Free / 0ms)
+      const localMatch = vocabList.find(v => v.malay.toLowerCase() === term || v.english.toLowerCase() === term);
+      if (localMatch) {
+        setSearchResult(localMatch);
+        setIsSearching(false);
+        return;
+      }
+
+      // 2. Free public MyMemory Translation API (100% Free / No API Key required!)
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(term)}&langpair=ms|en`).catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        const translatedText = data?.responseData?.translatedText;
+        if (translatedText && !translatedText.includes('NO QUERY SPECIFIED')) {
+          setSearchResult({
+            id: Date.now(),
+            category: 'Kamus Search',
+            malay: searchQuery.trim().replace(/^./, c => c.toUpperCase()),
+            english: translatedText.replace(/^./, c => c.toUpperCase()),
+            pronunciation: searchQuery.trim().toLowerCase(),
+            isNewSearch: true
+          });
+          setIsSearching(false);
+          return;
+        }
+      }
+
+      // 3. Fallback to free Gemini proxy definition
+      const activeKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key') || '';
+      if (!activeKey) throw new Error("Word definition not found in public dictionary.");
+
+      const ai = new GoogleGenAI({ apiKey: activeKey });
+      const prompt = `Define the Bahasa Melayu word "${searchQuery.trim()}". Return ONLY raw JSON: {"malay": "word", "english": "meaning", "pronunciation": "easy phonetic pronunciation"}`;
+      const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+      let clean = response.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstB = clean.indexOf('{');
+      const lastB = clean.lastIndexOf('}');
+      if (firstB !== -1 && lastB !== -1) clean = clean.slice(firstB, lastB + 1);
+      const obj = JSON.parse(clean);
+
+      setSearchResult({ ...obj, id: Date.now(), category: 'Kamus Search', isNewSearch: true });
+    } catch (err) {
+      console.error("Dictionary Lookup Error:", err);
+      setSearchError(`Definition for "${searchQuery}" not found. Check spelling.`);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddSearchResultToDeck = () => {
+    if (!searchResult) return;
+    setVocabList(prev => [{ ...searchResult, isAI: true }, ...prev]);
+    setSearchResult(null);
+    setSearchQuery('');
+    setXp(x => x + 20); // +20 XP bonus!
+    confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
   };
 
   // --- GEMINI AI DAILY 10 WORD GENERATOR ENGINE ---
@@ -231,31 +315,50 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
 
   return (
     <div className="app-shell">
-      {/* Header Banner - Wau Bulan Sunset Vibe */}
+      {/* Header Banner */}
       <header className="header-banner">
         <div className="title-area">
           <h1>
             <span className="flag-badge">🇲🇾</span>
-            <span>Bahasa Melayu Mastery Hub</span>
+            <span>Bahasa Melayu Hub</span>
           </h1>
-          <p style={{color: '#94a3b8', fontSize: '14px', marginTop: '6px'}}>
-            Wau Bulan Sunset Edition. Active Library: <strong style={{color: '#f59e0b'}}>{vocabList.length} Words</strong>
+          <p style={{color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px'}}>
+            {theme === 'dark' ? 'Wau Bulan Batik Sunset Edition' : 'Peranakan Rattan & Porcelain Edition'} • Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong>
           </p>
         </div>
 
         <div className="stats-bar">
+          {/* Theme Toggle Button */}
+          <button 
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            className="theme-toggle-btn"
+            title="Toggle Light / Dark theme"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={18} color="#f59e0b" />
+                <span>☀️ Light Theme</span>
+              </>
+            ) : (
+              <>
+                <Moon size={18} color="#4f46e5" />
+                <span>🌙 Dark Theme</span>
+              </>
+            )}
+          </button>
+
           <div className="stat-chip">
-            <Flame size={20} color="#ec4899" />
+            <Flame size={20} color="var(--accent-primary)" />
             <div>
-              <span style={{fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Day Streak</span>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Day Streak</span>
               <span className="stat-num">{streak} Days</span>
             </div>
           </div>
 
           <div className="stat-chip">
-            <Award size={20} color="#f59e0b" />
+            <Award size={20} color="var(--accent-secondary)" />
             <div>
-              <span style={{fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Fluency XP</span>
+              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Fluency XP</span>
               <span className="stat-num teal">{xp} XP</span>
             </div>
           </div>
@@ -269,7 +372,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
           className={`tab-btn ${activeTab === 'VOCAB' ? 'active' : ''}`}
         >
           <BookOpen size={18} />
-          <span>📚 Kosa Kata (Flashcards)</span>
+          <span>📚 Kosa Kata (Flashcards & Search)</span>
         </button>
 
         <button 
@@ -300,16 +403,67 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
       {/* --- TAB 1: VOCABULARY & FLASHCARDS --- */}
       {activeTab === 'VOCAB' && (
         <section>
+          {/* 100% FREE Dictionary Search Bar */}
+          <form onSubmit={handleDictionarySearch} className="kamus-search-box">
+            <Search size={22} color="var(--accent-primary)" />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="🔍 Search meaning of any Bahasa word (e.g. Sedap, Roti, Kucing)... [100% Free Dictionary]"
+              className="kamus-input"
+            />
+            <button type="submit" disabled={isSearching} className="kamus-search-btn">
+              {isSearching ? <Loader2 size={18} className="animate-spin" /> : <span>Cari (Search)</span>}
+            </button>
+          </form>
+
+          {/* Search Error Notification */}
+          {searchError && (
+            <p style={{color: '#f43f5e', fontSize: '14px', fontWeight: 'bold', marginBottom: '20px', textAlign: 'center'}}>
+              ⚠️ {searchError}
+            </p>
+          )}
+
+          {/* Search Result Card Popup */}
+          {searchResult && (
+            <div className="kamus-result-card">
+              <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                <button onClick={(e) => speakMalay(e, searchResult.malay)} className="audio-btn" style={{position: 'static'}}>
+                  <Volume2 size={20} />
+                </button>
+                <div>
+                  <span style={{fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold'}}>
+                    {searchResult.category}
+                  </span>
+                  <h3 style={{fontSize: '28px', fontWeight: '950', color: 'var(--text-main)', margin: '2px 0'}}>
+                    {searchResult.malay} &rarr; <span style={{color: 'var(--accent-primary)'}}>{searchResult.english}</span>
+                  </h3>
+                  <p style={{fontFamily: 'monospace', fontSize: '14px', color: 'var(--text-muted)'}}>
+                    Pronunciation: {searchResult.pronunciation}
+                  </p>
+                </div>
+              </div>
+
+              {searchResult.isNewSearch && (
+                <button onClick={handleAddSearchResultToDeck} className="add-deck-btn">
+                  <PlusCircle size={20} />
+                  <span>+ Add Word to My Deck</span>
+                </button>
+              )}
+            </div>
+          )}
+
           {/* AI Generator Action Banner */}
           <div className="ai-action-card">
             <div className="ai-card-info">
-              <Sparkles size={32} color="#f59e0b" />
+              <Sparkles size={32} color="var(--accent-secondary)" />
               <div>
                 <h3>
                   <span>✨ Expand Vocabulary with Gemini AI</span>
                   <span className="ai-tag">+10 Pure Malay Words</span>
                 </h3>
-                <p style={{color: '#cbd5e1', fontSize: '13px', marginTop: '4px'}}>Summon 10 commonly used Malaysian words (Zero English cognates like boss/OT).</p>
+                <p style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px'}}>Summon 10 commonly used Malaysian words (Zero English cognates like boss/OT).</p>
               </div>
             </div>
 
@@ -346,11 +500,11 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
                     <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn" title="Listen pronunciation">
                       <Volume2 size={18} />
                     </button>
-                    <span style={{fontSize: '12px', color: '#ec4899', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', display: 'block'}}>
+                    <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', display: 'block'}}>
                       {card.category}
                     </span>
                     <h2 className="word-malay">{card.malay}</h2>
-                    <p style={{fontSize: '12px', color: '#94a3b8', marginTop: '12px'}}>Click card to flip 🔄</p>
+                    <p style={{fontSize: '12px', color: 'var(--text-muted)', marginTop: '12px'}}>Click card to flip 🔄</p>
                   </div>
 
                   {/* Back Side */}
@@ -360,7 +514,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
                     </button>
                     <h3 className="word-eng">{card.english}</h3>
                     <div className="word-pronounce">{card.pronunciation}</div>
-                    <span style={{fontSize: '11px', color: '#f8fafc', fontWeight: 'bold'}}>🇲🇾 +5 Fluency XP</span>
+                    <span style={{fontSize: '11px', color: 'var(--text-main)', fontWeight: 'bold'}}>🇲🇾 +5 Fluency XP</span>
                   </div>
                 </div>
               </div>
@@ -374,20 +528,20 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         <section>
           <div className="quiz-card">
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
-              <span style={{fontSize: '12px', color: '#ec4899', fontWeight: 'bold', textTransform: 'uppercase', background: 'rgba(236,72,153,0.15)', padding: '6px 14px', borderRadius: '999px'}}>
+              <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase', background: 'rgba(236,72,153,0.15)', padding: '6px 14px', borderRadius: '999px'}}>
                 Card {quizStep + 1} of {quizDeck.length}
               </span>
-              <span style={{fontSize: '12px', color: '#94a3b8', fontWeight: 'bold'}}>
+              <span style={{fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'bold'}}>
                 Score: {quizScore}
               </span>
             </div>
 
-            <p style={{color: '#94a3b8', fontSize: '15px', marginTop: '12px'}}>What is the correct English translation for:</p>
+            <p style={{color: 'var(--text-muted)', fontSize: '15px', marginTop: '12px'}}>What is the correct English translation for:</p>
             
             <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', margin: '20px 0'}}>
               <h2 className="quiz-question" style={{margin: 0}}>{currentQuizItem.malay}</h2>
               <button onClick={(e) => speakMalay(e, currentQuizItem.malay)} className="audio-btn" style={{position: 'static', background: 'rgba(245,158,11,0.2)'}}>
-                <Volume2 size={20} color="#f59e0b" />
+                <Volume2 size={20} color="var(--accent-secondary)" />
               </button>
             </div>
 
@@ -432,7 +586,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         <section>
           {DIALOGUES.map((dlg, idx) => (
             <div key={idx} className="dialogue-box">
-              <h3 style={{fontSize: '20px', fontWeight: 'bold', color: '#f59e0b', marginBottom: '20px'}}>
+              <h3 style={{fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-secondary)', marginBottom: '20px'}}>
                 {dlg.title}
               </h3>
 
@@ -442,13 +596,13 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
                     <div className="speaker-avatar">{line.speaker.split(' ')[0]}</div>
                     <div className="dialogue-text">
                       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '4px'}}>
-                        <span style={{fontSize: '12px', fontWeight: 'bold', color: '#ec4899'}}>{line.speaker}</span>
-                        <button onClick={(e) => speakMalay(e, line.malay)} style={{background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer'}}>
+                        <span style={{fontSize: '12px', fontWeight: 'bold', color: 'var(--accent-primary)'}}>{line.speaker}</span>
+                        <button onClick={(e) => speakMalay(e, line.malay)} style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer'}}>
                           <Volume2 size={16} />
                         </button>
                       </div>
-                      <p style={{fontSize: '16px', fontWeight: 'bold', color: '#fff'}}>{line.malay}</p>
-                      <p style={{fontSize: '13px', color: '#94a3b8', fontStyle: 'italic', marginTop: '2px'}}>{line.english}</p>
+                      <p style={{fontSize: '16px', fontWeight: 'bold', color: 'var(--text-main)'}}>{line.malay}</p>
+                      <p style={{fontSize: '13px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px'}}>{line.english}</p>
                     </div>
                   </div>
                 ))}
@@ -463,14 +617,14 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         <section className="grammar-grid">
           <div className="grammar-rule-card">
             <h3>✨ 1. Zero Verb Conjugations</h3>
-            <p style={{fontSize: '14px', color: '#cbd5e1', lineHeight: '1.6'}}>
+            <p style={{fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6'}}>
               Unlike European languages, Malay verbs <strong>never change form</strong> based on tense or person. <em>Makan</em> means eat, ate, eating, or will eat. You simply add time markers like <em>Sudah</em> (already) or <em>Akan</em> (will).
             </p>
           </div>
 
           <div className="grammar-rule-card">
             <h3>✨ 2. Kata Ganda (Reduplication)</h3>
-            <p style={{fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6'}}>
+            <p style={{fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.6'}}>
               Malay uses reduplication (repeating words) for plurals, variety, and emphasis!
               <br/><br/>
               • <strong>Kata Ganda Penuh (Full):</strong> <em>Anak-anak</em> (Children), <em>Buku-buku</em> (Books)
@@ -483,7 +637,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
 
           <div className="grammar-rule-card">
             <h3>✨ 3. Adjective Placement</h3>
-            <p style={{fontSize: '14px', color: '#cbd5e1', lineHeight: '1.6'}}>
+            <p style={{fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6'}}>
               In Malay, the noun comes <strong>before</strong> the adjective.
               <br/><br/>
               • <strong>Rumah</strong> (House) + <strong>Besar</strong> (Big) = <em>Rumah Besar</em> (Big House)
@@ -498,22 +652,22 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
       {isAiModalOpen && (
         <div className="ai-modal-backdrop">
           <div className="ai-modal-box">
-            <Sparkles size={44} color="#f59e0b" style={{margin: '0 auto 14px'}} />
+            <Sparkles size={44} color="var(--accent-secondary)" style={{margin: '0 auto 14px'}} />
             <h2>Summon 10 Fresh Words</h2>
-            <p style={{color: '#94a3b8', fontSize: '14px', marginBottom: '28px'}}>Choose a situational theme or generate completely random everyday words!</p>
+            <p style={{color: 'var(--text-muted)', fontSize: '14px', marginBottom: '28px'}}>Choose a situational theme or generate completely random everyday words!</p>
 
-            {/* Quick Surprise Me Button (No category selection!) */}
+            {/* Quick Surprise Me Button */}
             <div style={{marginBottom: '26px', padding: '16px', background: 'rgba(236,72,153,0.1)', border: '1px dashed rgba(236,72,153,0.4)', borderRadius: '20px'}}>
               <button
                 disabled={isGenerating}
                 onClick={() => handleGenerateAIWords('Random Practical Everyday Malaysian Words across various life scenarios')}
                 className="ai-btn"
-                style={{width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)', color: '#fff'}}
+                style={{width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)', color: '#fff'}}
               >
                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Dices size={20} />}
                 <span>🎲 Surprise Me! (Generate Random Words)</span>
               </button>
-              <p style={{fontSize: '11px', color: '#cbd5e1', marginTop: '6px'}}>Bypasses category selection to summon 10 random high-frequency words.</p>
+              <p style={{fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px'}}>Bypasses category selection to summon 10 random high-frequency words.</p>
             </div>
 
             <div className="form-field">
