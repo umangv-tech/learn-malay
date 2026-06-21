@@ -44,10 +44,17 @@ const DIALOGUES = [
 ];
 
 const PRACTICE_SENTENCES = [
-  { targetEng: 'I want to eat nasi lemak this morning', words: ['Saya', 'nak', 'makan', 'nasi', 'lemak', 'pagi', 'ini'] },
-  { targetEng: 'Please make one teh tarik less sweet', words: ['Tolong', 'buat', 'teh', 'tarik', 'satu', 'kurang', 'manis'] },
-  { targetEng: 'Where is the public train station', words: ['Di', 'mana', 'stesen', 'kereta', 'api', 'awam'] },
-  { targetEng: 'Night market durians are cheap and delicious', words: ['Durian', 'pasar', 'malam', 'murah', 'dan', 'sedap'] }
+  // Level 1: Beginner (3 Words)
+  { level: 'Beginner', targetEng: 'Good morning boss', words: ['Selamat', 'pagi', 'boss'] },
+  { level: 'Beginner', targetEng: 'Thank you very much', words: ['Terima', 'kasih', 'banyak'] },
+  { level: 'Beginner', targetEng: 'Delicious fried noodles', words: ['Mee', 'goreng', 'sedap'] },
+  { level: 'Beginner', targetEng: 'Where is the toilet', words: ['Tandas', 'di', 'mana'] },
+  // Level 2: Easy (4 & 5 Words)
+  { level: 'Easy', targetEng: 'Hot tea less sweet', words: ['Teh', 'panas', 'kurang', 'manis'] },
+  { level: 'Easy', targetEng: 'I want to eat chicken rice', words: ['Saya', 'nak', 'makan', 'nasi', 'ayam'] },
+  // Level 3: Advanced (6 & 7 Words)
+  { level: 'Intermediate', targetEng: 'Night market durians are very cheap', words: ['Durian', 'pasar', 'malam', 'sangat', 'murah'] },
+  { level: 'Advanced', targetEng: 'Please make one teh tarik less sweet', words: ['Tolong', 'buat', 'teh', 'tarik', 'satu', 'kurang', 'manis'] }
 ];
 
 export default function App() {
@@ -668,7 +675,9 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
           <div className="scramble-card">
             <h3 style={{fontSize: '24px', fontWeight: '950', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px'}}>
               <span>🧩 Bina Ayat</span>
-              <span style={{fontSize: '11px', background: 'var(--accent-primary)', color: '#000', padding: '3px 10px', borderRadius: '999px'}}>Scrambled Puzzle</span>
+              <span style={{fontSize: '11px', background: 'var(--accent-primary)', color: '#000', padding: '4px 12px', borderRadius: '999px', fontWeight: 'bold'}}>
+                {currentScramble.level || 'Beginner'} &bull; {currentScramble.words.length} Words
+              </span>
             </h3>
             <p style={{fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px'}}>Tap word blocks in correct Malay order (Noun before Adjective).</p>
 
