@@ -508,27 +508,6 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
 
   return (
     <div className="app-shell">
-      {/* Subtle Apple macOS Menu Status Ribbon */}
-      <div style={{background: activeProfile === 'UMANG' ? '#090e17' : '#121113', padding: '6px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderBottom: '1px solid var(--glass-border)', transition: 'all 0.35s ease'}}>
-        <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)'}}>
-          <span>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
-          <span>Workspace: <strong style={{color: 'var(--text-main)'}}>{activeProfile === 'UMANG' ? "Umang" : "Archana"}</strong></span>
-        </div>
-
-        <button 
-          onClick={() => {
-            const next = activeProfile === 'UMANG' ? 'ARCHANA' : 'UMANG';
-            setActiveProfile(next);
-            localStorage.setItem('malay_active_prof', next);
-            confetti({ particleCount: 35, spread: 50, origin: { y: 0.1 } });
-          }}
-          style={{background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 'bold', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'underline', opacity: 0.85, padding: 0}}
-          title="Switch active profile"
-        >
-          <span>⇄ Switch to {activeProfile === 'UMANG' ? 'Archana' : 'Umang'}</span>
-        </button>
-      </div>
-
       {/* Header Banner - Royal Emerald & Malacca Gold */}
       <header className="header-banner">
         <div className="title-area">
@@ -550,7 +529,41 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
           </div>
         </div>
 
-        <div className="stats-bar">
+        <div className="stats-bar" style={{alignItems: 'center'}}>
+          {/* Apple iOS Segmented Profile Switcher Pill */}
+          <div style={{display: 'flex', background: 'var(--input-bg)', border: '1px solid var(--glass-border)', borderRadius: '999px', padding: '3px', gap: '2px', alignItems: 'center'}}>
+            <button 
+              type="button"
+              onClick={() => {
+                if (activeProfile !== 'UMANG') {
+                  setActiveProfile('UMANG');
+                  localStorage.setItem('malay_active_prof', 'UMANG');
+                  confetti({ particleCount: 30, spread: 50, origin: { y: 0.2 } });
+                }
+              }}
+              style={{background: activeProfile === 'UMANG' ? '#00d2c4' : 'transparent', color: activeProfile === 'UMANG' ? '#000' : 'var(--text-muted)', border: 'none', padding: '6px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: '950', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '5px'}}
+              title="Switch to Umang's workspace"
+            >
+              <span>👨</span>
+              <span>Umang</span>
+            </button>
+
+            <button 
+              type="button"
+              onClick={() => {
+                if (activeProfile !== 'ARCHANA') {
+                  setActiveProfile('ARCHANA');
+                  localStorage.setItem('malay_active_prof', 'ARCHANA');
+                  confetti({ particleCount: 30, spread: 50, origin: { y: 0.2 } });
+                }
+              }}
+              style={{background: activeProfile === 'ARCHANA' ? '#a855f7' : 'transparent', color: activeProfile === 'ARCHANA' ? '#fff' : 'var(--text-muted)', border: 'none', padding: '6px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: '950', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '5px'}}
+              title="Switch to Archana's workspace"
+            >
+              <span>👩</span>
+              <span>Archana</span>
+            </button>
+          </div>
 
           <button 
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
