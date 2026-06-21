@@ -44,7 +44,7 @@ const DIALOGUES = [
 ];
 
 const PRACTICE_SENTENCES = [
-  { targetEng: 'I want to eat nasi lemak this morning', words: ['Saya', 'mahu', 'makan', 'nasi', 'lemak', 'pagi', 'ini'] },
+  { targetEng: 'I want to eat nasi lemak this morning', words: ['Saya', 'nak', 'makan', 'nasi', 'lemak', 'pagi', 'ini'] },
   { targetEng: 'Please make one teh tarik less sweet', words: ['Tolong', 'buat', 'teh', 'tarik', 'satu', 'kurang', 'manis'] },
   { targetEng: 'Where is the public train station', words: ['Di', 'mana', 'stesen', 'kereta', 'api', 'awam'] },
   { targetEng: 'Night market durians are cheap and delicious', words: ['Durian', 'pasar', 'malam', 'murah', 'dan', 'sedap'] }
@@ -218,8 +218,10 @@ export default function App() {
         if (!activeKey) throw new Error("API Key missing");
 
         const ai = new GoogleGenAI({ apiKey: activeKey });
-        const prompt = `Act as an encouraging KL Bahasa Melayu language coach. Analyze this student sentence: "${practiceInput}".
-Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "feedback": "concise explanation", "nativeBetter": "natural native KL phrasing"}`;
+        const prompt = `Act as an encouraging KL Bahasa Melayu language coach. Analyze this practice sentence typed by an English-speaking student: "${practiceInput}".
+CRITICAL LANGUAGE REQUIREMENT: You MUST write the "feedback" explanation strictly in clear, friendly ENGLISH! Do not write feedback in Malay.
+GRADING RULE: If the student writes correct formal or casual Malay, grade it 10/10! In feedback, explain their grammar in English.
+Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "feedback": "encouraging explanation written strictly in ENGLISH", "nativeBetter": "natural KL street phrasing in Malay"}`;
         const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
         let clean = response.text.replace(/```json/gi, '').replace(/```/g, '').trim();
         const fB = clean.indexOf('{');

@@ -17,13 +17,15 @@ export default async function handler(req, res) {
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Act as an encouraging, expert KL Bahasa Melayu language coach. Analyze this practice sentence typed by a student: "${sentence}".
+    const prompt = `Act as an encouraging, expert KL Bahasa Melayu language coach. Analyze this practice sentence typed by an English-speaking student: "${sentence}".
+CRITICAL LANGUAGE REQUIREMENT: You MUST write the "feedback" explanation strictly in clear, friendly ENGLISH! Do not write feedback in Malay.
+GRADING RULE: If the student writes correct textbook Malay (e.g. using 'mahu' or 'saya'), grade it 10/10! In feedback, praise their grammar in English, and mention street contractions (like 'nak' instead of 'mahu') as an optional casual tip.
 Return ONLY raw valid JSON matching this exact schema:
 {
-  "rating": number (1 to 10 scale of conversational naturalness),
+  "rating": number (1 to 10 scale),
   "isCorrect": boolean,
-  "feedback": "Concise 1 or 2 sentence explanation of grammar or tone",
-  "nativeBetter": "The exact natural way a native KL resident would say this"
+  "feedback": "Encouraging 1 or 2 sentence explanation written strictly in ENGLISH",
+  "nativeBetter": "Authentic conversational KL phrasing in Malay"
 }`;
 
     const response = await ai.models.generateContent({
