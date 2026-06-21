@@ -95,6 +95,7 @@ export default function App() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
   const [searchError, setSearchError] = useState('');
+  const [searchLang, setSearchLang] = useState('MS_EN'); // MS_EN | EN_MS
 
   // Gamification XP & Non-Repeating Shuffled Quiz State
   const [xp, setXp] = useState(() => parseInt(localStorage.getItem('malay_xp') || '0', 10));
@@ -248,7 +249,7 @@ Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "fee
     }
   };
 
-  // --- FREE KAMUS DICTIONARY LOOKUP ENGINE ---
+  // --- FREE KAMUS DICTIONARY LOOKUP ENGINE (Dual Direction MS->EN / EN->MS) ---
   const handleDictionarySearch = async (e) => {
     e?.preventDefault();
     if (!searchQuery.trim()) return;
@@ -266,17 +267,19 @@ Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "fee
         return;
       }
 
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(term)}&langpair=ms|en`).catch(() => null);
+      const langPair = searchLang === 'MS_EN' ? 'ms|en' : 'en|ms';
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(term)}&langpair=${langPair}`).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const translatedText = data?.responseData?.translatedText;
         if (translatedText && !translatedText.includes('NO QUERY SPECIFIED')) {
+          const isMsToEn = searchLang === 'MS_EN';
           setSearchResult({
             id: Date.now(),
             category: 'Kamus',
-            malay: searchQuery.trim().replace(/^./, c => c.toUpperCase()),
-            english: translatedText.replace(/^./, c => c.toUpperCase()),
-            pronunciation: searchQuery.trim().toLowerCase(),
+            malay: isMsToEn ? searchQuery.trim().replace(/^./, c => c.toUpperCase()) : translatedText.replace(/^./, c => c.toUpperCase()),
+            english: isMsToEn ? translatedText.replace(/^./, c => c.toUpperCase()) : searchQuery.trim().replace(/^./, c => c.toUpperCase()),
+            pronunciation: isMsToEn ? searchQuery.trim().toLowerCase() : translatedText.toLowerCase(),
             isNewSearch: true
           });
           setIsSearching(false);
@@ -288,7 +291,10 @@ Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "fee
       if (!activeKey) throw new Error("Not found");
 
       const ai = new GoogleGenAI({ apiKey: activeKey });
-      const prompt = `Define the Bahasa Melayu word "${searchQuery.trim()}". Return ONLY raw JSON: {"malay": "word", "english": "meaning", "pronunciation": "phonetic"}`;
+      const prompt = searchLang === 'MS_EN'
+        ? `Define the Bahasa Melayu word "${searchQuery.trim()}". Return ONLY raw JSON: {"malay": "${searchQuery.trim()}", "english": "meaning", "pronunciation": "phonetic"}`
+        : `Translate the English word "${searchQuery.trim()}" into Malay. Return ONLY raw JSON: {"malay": "malay translation", "english": "${searchQuery.trim()}", "pronunciation": "phonetic"}`;
+
       const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
       let clean = response.text.replace(/```json/gi, '').replace(/```/g, '').trim();
       const firstB = clean.indexOf('{');
@@ -496,14 +502,23 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
       {/* --- TAB 1: VOCABULARY --- */}
       {activeTab === 'VOCAB' && (
         <section>
-          {/* Minimalist Dictionary Search Bar */}
+          {/* Minimalist Bi-Directional Dictionary Search Bar */}
           <form onSubmit={handleDictionarySearch} className="kamus-search-box">
-            <Search size={22} color="var(--accent-primary)" />
+            <button 
+              type="button" 
+              onClick={() => setSearchLang(l => l === 'MS_EN' ? 'EN_MS' : 'MS_EN')}
+              style={{background: 'var(--pill-bg)', border: '1px solid var(--glass-border)', padding: '8px 14px', borderRadius: '16px', fontSize: '13px', fontWeight: '950', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0}}
+              title="Click to flip translation direction"
+            >
+              <span>{searchLang === 'MS_EN' ? '🇲🇾 MS → EN' : '🇬🇧 EN → MS'}</span>
+              <RotateCcw size={14} />
+            </button>
+
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search dictionary..."
+              placeholder={searchLang === 'MS_EN' ? "Search Malay word (e.g. Sedap)..." : "Search English word (e.g. Water)..."}
               className="kamus-input"
             />
             <button type="submit" disabled={isSearching} className="kamus-search-btn">
@@ -536,12 +551,22 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
                 </div>
               </div>
 
-              {searchResult.isNewSearch && (
-                <button onClick={handleAddSearchResultToDeck} className="add-deck-btn">
-                  <PlusCircle size={20} />
-                  <span>+ Add to Deck</span>
+              <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+                {searchResult.isNewSearch && (
+                  <button onClick={handleAddSearchResultToDeck} className="add-deck-btn">
+                    <PlusCircle size={20} />
+                    <span>+ Add to Deck</span>
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => { setSearchResult(null); setSearchQuery(''); }} 
+                  style={{background: 'var(--input-bg)', border: '2px solid var(--glass-border)', color: 'var(--text-main)', padding: '14px 18px', borderRadius: '16px', cursor: 'pointer', fontWeight: '950', fontSize: '15px'}}
+                  title="Close definition"
+                >
+                  <span>✖ Close</span>
                 </button>
-              )}
+              </div>
             </div>
           )}
 
