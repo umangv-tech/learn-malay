@@ -495,7 +495,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
           </h1>
           <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
             <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
-            <span>&bull;</span>
+            <span style={{opacity: 0.3}}>|</span>
             <button 
               onClick={handleExportCsv}
               style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'underline', cursor: 'pointer', opacity: 0.65, padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px'}}
