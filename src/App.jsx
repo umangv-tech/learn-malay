@@ -674,13 +674,28 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
               Target: "{currentScramble.targetEng}"
             </div>
 
+            {/* Real-time word order feedback bar */}
+            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px'}}>
+              <span>Progress: {assembledWords.filter((w, i) => w.text.toLowerCase() === currentScramble.words[i]?.toLowerCase()).length} / {currentScramble.words.length} words correct</span>
+              <span>🟢 ✓ Correct &nbsp;&bull;&nbsp; 🔴 ✗ Wrong (Tap to remove)</span>
+            </div>
+
             <div className="assembled-area">
               {assembledWords.length === 0 && <span style={{color: 'var(--text-muted)', fontSize: '14px'}}>Tap tiles below to assemble sentence...</span>}
-              {assembledWords.map(w => (
-                <button key={w.id} onClick={() => handleReturnWord(w)} className="word-block selected">
-                  {w.text}
-                </button>
-              ))}
+              {assembledWords.map((w, idx) => {
+                const targetWord = currentScramble.words[idx];
+                const isCorrectSlot = w.text.toLowerCase() === targetWord?.toLowerCase();
+
+                return (
+                  <button 
+                    key={w.id} 
+                    onClick={() => handleReturnWord(w)} 
+                    className={`word-block ${isCorrectSlot ? 'correct-slot' : 'wrong-slot'}`}
+                  >
+                    {w.text} {isCorrectSlot ? '✓' : '✗'}
+                  </button>
+                );
+              })}
             </div>
 
             <div style={{display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px', minHeight: '50px'}}>

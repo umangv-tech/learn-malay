@@ -649,6 +649,18 @@ body {
   border-color: var(--accent-primary);
 }
 
+.word-block.correct-slot {
+  background: #10b981 !important;
+  color: #000 !important;
+  border-color: #10b981 !important;
+}
+
+.word-block.wrong-slot {
+  background: #f43f5e !important;
+  color: #fff !important;
+  border-color: #f43f5e !important;
+}
+
 .word-block.pool {
   background: var(--pill-bg);
 }
