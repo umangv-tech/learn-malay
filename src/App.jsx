@@ -410,10 +410,19 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
     }
   };
 
-  const categoriesAvailable = ['ALL', ...new Set(vocabList.map(v => v.category))];
+  const getMasterBucket = (cat = '', isAI = false) => {
+    if (isAI || cat.startsWith('AI:') || cat.includes('AI Generated') || cat.includes('Everyday:')) return '✨ AI Generated';
+    if (cat.includes('Food') || cat.includes('Mamak')) return '🍛 Food & Dining';
+    if (cat.includes('Travel') || cat.includes('Money')) return '🚕 Travel & Shopping';
+    if (cat.includes('Kata Ganda')) return '🇲🇾 Kata Ganda';
+    return '📌 Essentials';
+  };
+
+  const masterBuckets = ['ALL', '📌 Essentials', '🍛 Food & Dining', '🚕 Travel & Shopping', '🇲🇾 Kata Ganda', '✨ AI Generated'];
+
   const filteredVocab = selectedCategory === 'ALL' 
     ? vocabList 
-    : vocabList.filter(v => v.category === selectedCategory);
+    : vocabList.filter(v => getMasterBucket(v.category, v.isAI) === selectedCategory);
 
   return (
     <div className="app-shell">
@@ -586,15 +595,15 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             </button>
           </div>
 
-          {/* Category Filter Pills */}
+          {/* Minimalist Master Category Filter Pills */}
           <div className="category-pills">
-            {categoriesAvailable.map(cat => (
+            {masterBuckets.map(cat => (
               <button 
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`cat-pill ${selectedCategory === cat ? 'active' : ''}`}
               >
-                {cat === 'ALL' ? 'All' : cat}
+                {cat === 'ALL' ? '🌟 All Words' : cat}
               </button>
             ))}
           </div>
