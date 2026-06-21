@@ -1,12 +1,10 @@
 import { GoogleGenAI } from '@google/genai';
 
 export default async function handler(req, res) {
-  // CORS & Method check
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
   }
 
-  // Vercel private server secret (Bypasses public frontend bundle!)
   const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ 
@@ -14,16 +12,17 @@ export default async function handler(req, res) {
     });
   }
 
-  const { topic = 'Everyday Conversational Words' } = req.body || {};
+  const { topic = 'Random Practical Everyday Malaysian Words' } = req.body || {};
 
   try {
     const ai = new GoogleGenAI({ apiKey });
     const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${topic}". 
 CRITICAL GRAMMAR REQUIREMENT: Ensure at least 3 of the 10 generated words showcase classic Malaysian reduplication (Kata Ganda - such as Kata Ganda Penuh [e.g. anak-anak], Kata Ganda Separa [e.g. jejari, lelangit], or Kata Ganda Berentak [e.g. kuih-muih, gotong-royong]).
+CRITICAL PURITY FILTER: Do NOT include English loan words or obvious cognates (such as boss/bos, meeting/miting, OT/overtime, fail/file, e-mel/email, bank, teksi, ekon). Only generate authentic Malaysian vocabulary where the Malay word is distinct from English.
 Return ONLY a valid raw JSON array of objects. Do not include markdown formatting or backticks. 
 Each object MUST match this schema:
 {"id": number, "category": string, "malay": string, "english": string, "pronunciation": string}
-Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Dining') and pronunciation is an easy English phonetic guide.`;
+Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunciation is an easy English phonetic guide.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -45,7 +44,6 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Dining') and pronuncia
       throw new Error("AI returned invalid array structure.");
     }
 
-    // Attach unique server timestamps
     const words = parsedWords.map((w, idx) => ({
       ...w,
       id: Date.now() + idx,
