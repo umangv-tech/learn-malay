@@ -563,17 +563,6 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
 
         <div className="stats-bar" style={{alignItems: 'center'}}>
           <button 
-            type="button"
-            onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
-            className="theme-toggle-btn"
-            style={{color: activeProfile === 'UMANG' ? '#00d2c4' : '#a855f7', borderColor: activeProfile === 'UMANG' ? '#00d2c4' : '#a855f7', fontWeight: '950'}}
-            title="Lock workspace and return to profile selection"
-          >
-            <span>{activeProfile === 'UMANG' ? '👨 Umang' : '👩 Archana'}</span>
-            <Lock size={14} />
-          </button>
-
-          <button 
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
             className="theme-toggle-btn"
           >
@@ -604,6 +593,18 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
               <span className="stat-num teal">{xp} XP</span>
             </div>
           </div>
+
+          {/* Prominent Profile Signature Lock Badge (Far Right) */}
+          <button 
+            type="button"
+            onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
+            style={{background: activeProfile === 'UMANG' ? 'linear-gradient(135deg, #00d2c4, #0d9488)' : 'linear-gradient(135deg, #a855f7, #7e22ce)', color: activeProfile === 'UMANG' ? '#000' : '#fff', border: 'none', padding: '7px 16px', borderRadius: '999px', fontWeight: '950', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', marginLeft: '8px'}}
+            title="Lock workspace and return to Netflix profile selection portal"
+          >
+            <span style={{fontSize: '16px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
+            <span>{activeProfile === 'UMANG' ? 'Umang' : 'Archana'}</span>
+            <Lock size={14} style={{opacity: 0.85}} />
+          </button>
         </div>
       </header>
 
