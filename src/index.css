@@ -1,8 +1,8 @@
 :root[data-theme="dark"] {
   --bg-main: #090e17;
   --bg-card: #111a2c;
-  --accent-primary: #00d2c4; /* Royal Petronas Cyan - zero pink! */
-  --accent-secondary: #f59e0b; /* Malacca Gold */
+  --accent-primary: #00d2c4;
+  --accent-secondary: #f59e0b;
   --accent-teal: #38bdf8;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
@@ -15,10 +15,10 @@
 }
 
 :root[data-theme="light"] {
-  --bg-main: #eef2f6; /* Gentle soothing cool grey - not harsh white! */
+  --bg-main: #eef2f6;
   --bg-card: #ffffff;
-  --accent-primary: #0d9488; /* Peranakan Celadon Green */
-  --accent-secondary: #d97706; /* Warm Ochre Amber */
+  --accent-primary: #0d9488;
+  --accent-secondary: #d97706;
   --accent-teal: #0284c7;
   --text-main: #0f172a;
   --text-muted: #64748b;
@@ -55,7 +55,7 @@ body {
   padding: 32px 24px 100px;
 }
 
-/* Header Banner - Royal Emerald & Gold Luxury */
+/* Header Banner */
 .header-banner {
   background: var(--banner-grad);
   border: 1px solid var(--glass-border);
@@ -162,14 +162,14 @@ body {
   background: var(--bg-card);
   color: var(--text-muted);
   border: 1px solid var(--glass-border);
-  padding: 18px 30px;
+  padding: 18px 28px;
   border-radius: 24px;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   box-shadow: var(--card-shadow);
@@ -364,7 +364,7 @@ body {
 /* 3D Card Flip */
 .flip-card {
   background: transparent;
-  height: 230px;
+  height: 250px;
   perspective: 1000px;
   cursor: pointer;
 }
@@ -389,7 +389,7 @@ body {
   height: 100%;
   backface-visibility: hidden;
   border-radius: 28px;
-  padding: 30px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -413,35 +413,49 @@ body {
   font-size: 30px;
   font-weight: 950;
   color: var(--text-main);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .word-eng {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   color: var(--accent-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .word-pronounce {
-  font-size: 15px;
+  font-size: 14px;
   font-family: monospace;
   color: var(--text-main);
   background: var(--pill-bg);
-  padding: 6px 14px;
-  border-radius: 10px;
-  margin-bottom: 14px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
+
+/* Flashcard Example Sentence Snippet */
+.card-example-box {
+  background: rgba(0,0,0,0.3);
+  border-left: 3px solid var(--accent-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.ex-malay { font-size: 13px; font-weight: 800; color: #fff; }
+.ex-eng { font-size: 11px; font-style: italic; color: var(--text-muted); }
 
 .audio-btn {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
   background: var(--pill-bg);
   border: none;
   color: var(--text-main);
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -572,6 +586,82 @@ body {
   gap: 12px;
 }
 
+/* Tab 5: Bina Ayat Scrambled Builder & AI Doctor */
+.bina-ayat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.scramble-card, .doctor-card {
+  background: var(--bg-card);
+  border: 2px solid var(--glass-border);
+  border-radius: 32px;
+  padding: 36px;
+  box-shadow: var(--card-shadow);
+}
+
+.scramble-target {
+  font-size: 20px;
+  color: var(--accent-secondary);
+  font-weight: 900;
+  margin: 16px 0 24px;
+  padding: 14px 20px;
+  background: var(--input-bg);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.assembled-area {
+  min-height: 80px;
+  border: 2px dashed var(--accent-teal);
+  border-radius: 22px;
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 26px;
+  background: rgba(0,0,0,0.25);
+}
+
+.word-block {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 2px solid var(--glass-border);
+  padding: 12px 22px;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.word-block:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.word-block.selected {
+  background: var(--accent-primary);
+  color: #000;
+  border-color: var(--accent-primary);
+}
+
+.word-block.pool {
+  background: var(--pill-bg);
+}
+
+.doctor-result-box {
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--input-bg);
+  border-radius: 20px;
+  border: 2px solid var(--accent-teal);
+  animation: fadeIn 0.3s;
+}
+
 /* Modal Popup Styles */
 .ai-modal-backdrop {
   position: fixed;
@@ -681,10 +771,10 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 850px) {
   .header-banner { padding: 24px; flex-direction: column; text-align: center; }
   .stats-bar { width: 100%; justify-content: center; }
-  .quiz-options { grid-template-columns: 1fr; }
-  .flip-card { height: 210px; }
+  .quiz-options, .bina-ayat-grid { grid-template-columns: 1fr; }
+  .flip-card { height: 220px; }
   .ai-action-card, .kamus-search-box { flex-direction: column; text-align: center; }
 }

@@ -1,35 +1,35 @@
 import { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import confetti from 'canvas-confetti';
-import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle } from 'lucide-react';
+import { BookOpen, Award, MessageCircle, HelpCircle, Volume2, Sparkles, Flame, ArrowRight, Plus, Dices, Loader2, Sun, Moon, Search, PlusCircle, PenTool, CheckCircle2, RotateCcw } from 'lucide-react';
 
 const BASE_VOCAB = [
-  { id: 1, category: 'Essentials', malay: 'Selamat Pagi', english: 'Good Morning', pronunciation: 'suh-LAH-maht PAH-gee' },
-  { id: 2, category: 'Essentials', malay: 'Terima Kasih', english: 'Thank You', pronunciation: 'tuh-REE-mah KAH-seh' },
-  { id: 3, category: 'Essentials', malay: 'Sama-sama', english: "You're Welcome", pronunciation: 'SAH-mah SAH-mah' },
-  { id: 4, category: 'Essentials', malay: 'Apa Khabar?', english: 'How are you?', pronunciation: 'AH-pah KAH-bar' },
-  { id: 5, category: 'Food & Mamak', malay: 'Makan', english: 'To Eat / Meal', pronunciation: 'MAH-kahn' },
-  { id: 6, category: 'Food & Mamak', malay: 'Sedap', english: 'Delicious', pronunciation: 'SUH-dahp' },
-  { id: 7, category: 'Food & Mamak', malay: 'Kurang Manis', english: 'Less Sweet', pronunciation: 'KOO-rahng MAH-nees' },
-  { id: 8, category: 'Food & Mamak', malay: 'Bungkus', english: 'Takeaway / To Go', pronunciation: 'BOONG-koos' },
-  { id: 9, category: 'Money & Ringgit', malay: 'Berapa?', english: 'How much?', pronunciation: 'buh-RAH-pah' },
-  { id: 10, category: 'Money & Ringgit', malay: 'Mahal', english: 'Expensive', pronunciation: 'MAH-hahl' },
-  { id: 11, category: 'Money & Ringgit', malay: 'Murah', english: 'Cheap', pronunciation: 'MOO-rah' },
-  { id: 12, category: 'Travel', malay: 'Di mana ...?', english: 'Where is ...?', pronunciation: 'dee MAH-nah' },
-  { id: 13, category: 'Travel', malay: 'Tandas', english: 'Restroom / Toilet', pronunciation: 'TAHN-dahs' },
-  { id: 14, category: 'Travel', malay: 'Jalan', english: 'Street / To Walk', pronunciation: 'JAH-lahn' },
-  { id: 15, category: 'Kata Ganda', malay: 'Anak-anak', english: 'Children (Full Reduplication)', pronunciation: 'AH-nahk AH-nahk' },
-  { id: 16, category: 'Kata Ganda', malay: 'Jejari', english: 'Fingers / Spokes (Partial Reduplication)', pronunciation: 'juh-JAH-ree' },
-  { id: 17, category: 'Kata Ganda', malay: 'Kuih-muih', english: 'Assorted Cakes (Rhyming)', pronunciation: 'KWEY MOO-wey' }
+  { id: 1, category: 'Essentials', malay: 'Selamat Pagi', english: 'Good Morning', pronunciation: 'suh-LAH-maht PAH-gee', exampleMalay: 'Selamat pagi, boss! Apa khabar hari ini?', exampleEnglish: 'Good morning, boss! How are you today?' },
+  { id: 2, category: 'Essentials', malay: 'Terima Kasih', english: 'Thank You', pronunciation: 'tuh-REE-mah KAH-seh', exampleMalay: 'Terima kasih banyak atas bantuan anda.', exampleEnglish: 'Thank you very much for your help.' },
+  { id: 3, category: 'Essentials', malay: 'Sama-sama', english: "You're Welcome", pronunciation: 'SAH-mah SAH-mah', exampleMalay: 'Sama-sama, gembira dapat membantu.', exampleEnglish: "You're welcome, happy to help." },
+  { id: 4, category: 'Essentials', malay: 'Apa Khabar?', english: 'How are you?', pronunciation: 'AH-pah KAH-bar', exampleMalay: 'Hai lama tidak berjumpa, apa khabar?', exampleEnglish: "Hi long time no see, how are you?" },
+  { id: 5, category: 'Food & Mamak', malay: 'Makan', english: 'To Eat / Meal', pronunciation: 'MAH-kahn', exampleMalay: 'Jom kita pergi makan nasi lemak sekarang.', exampleEnglish: 'Let us go eat nasi lemak now.' },
+  { id: 6, category: 'Food & Mamak', malay: 'Sedap', english: 'Delicious', pronunciation: 'SUH-dahp', exampleMalay: 'Mee goreng di kedai mamak ini sangat sedap.', exampleEnglish: 'The fried noodles at this mamak stall are delicious.' },
+  { id: 7, category: 'Food & Mamak', malay: 'Kurang Manis', english: 'Less Sweet', pronunciation: 'KOO-rahng MAH-nees', exampleMalay: 'Tolong buat teh tarik satu, kurang manis.', exampleEnglish: 'Please make one teh tarik, less sweet.' },
+  { id: 8, category: 'Food & Mamak', malay: 'Bungkus', english: 'Takeaway / To Go', pronunciation: 'BOONG-koos', exampleMalay: 'Roti canai dua bungkus untuk dibawa pulang.', exampleEnglish: 'Two roti canai takeaway to bring home.' },
+  { id: 9, category: 'Money & Ringgit', malay: 'Berapa?', english: 'How much?', pronunciation: 'buh-RAH-pah', exampleMalay: 'Berapa harga buah durian ini sekilo?', exampleEnglish: 'How much is this durian per kilo?' },
+  { id: 10, category: 'Money & Ringgit', malay: 'Mahal', english: 'Expensive', pronunciation: 'MAH-hahl', exampleMalay: 'Barangan di pusat beli-belah itu agak mahal.', exampleEnglish: 'Goods at that shopping mall are quite expensive.' },
+  { id: 11, category: 'Money & Ringgit', malay: 'Murah', english: 'Cheap', pronunciation: 'MOO-rah', exampleMalay: 'Sayur-mayur di pasar malam jauh lebih murah.', exampleEnglish: 'Vegetables at the night market are much cheaper.' },
+  { id: 12, category: 'Travel', malay: 'Di mana ...?', english: 'Where is ...?', pronunciation: 'dee MAH-nah', exampleMalay: 'Tumpang tanya, di mana stesen kereta api?', exampleEnglish: 'Excuse me, where is the train station?' },
+  { id: 13, category: 'Travel', malay: 'Tandas', english: 'Restroom / Toilet', pronunciation: 'TAHN-dahs', exampleMalay: 'Boleh saya tahu di mana tandas awam?', exampleEnglish: 'May I know where the public toilet is?' },
+  { id: 14, category: 'Travel', malay: 'Jalan', english: 'Street / To Walk', pronunciation: 'JAH-lahn', exampleMalay: 'Kita perlu jalan terus sebelum belok kanan.', exampleEnglish: 'We need to walk straight before turning right.' },
+  { id: 15, category: 'Kata Ganda', malay: 'Anak-anak', english: 'Children (Kata Ganda Penuh)', pronunciation: 'AH-nahk AH-nahk', exampleMalay: 'Anak-anak sedang bermain bola di padang.', exampleEnglish: 'The children are playing football in the field.' },
+  { id: 16, category: 'Kata Ganda', malay: 'Jejari', english: 'Fingers / Spokes (Kata Ganda Separa)', pronunciation: 'juh-JAH-ree', exampleMalay: 'Jejari basikal adik patah akibat kemalangan.', exampleEnglish: 'My younger sibling bike spokes broke from an accident.' },
+  { id: 17, category: 'Kata Ganda', malay: 'Kuih-muih', english: 'Assorted Cakes (Kata Ganda Berentak)', pronunciation: 'KWEY MOO-wey', exampleMalay: 'Ibu menyediakan pelbagai kuih-muih tradisional.', exampleEnglish: 'Mother prepared assorted traditional cakes.' }
 ];
 
 const DIALOGUES = [
   {
     title: 'Ordering at a Mamak Stall',
     lines: [
-      { speaker: 'Boss', malay: 'Makan atau bungkus?', english: 'Dine in or takeaway?' },
+      { speaker: 'Boss Stall', malay: 'Makan atau bungkus?', english: 'Dine in or takeaway?' },
       { speaker: 'You', malay: 'Makan sini. Roti canai satu.', english: 'Dine in. One roti canai.' },
-      { speaker: 'Boss', malay: 'Minum apa?', english: 'What to drink?' },
+      { speaker: 'Boss Stall', malay: 'Minum apa?', english: 'What to drink?' },
       { speaker: 'You', malay: 'Teh tarik satu, kurang manis!', english: 'One teh tarik, less sweet!' }
     ]
   },
@@ -43,8 +43,15 @@ const DIALOGUES = [
   }
 ];
 
+const PRACTICE_SENTENCES = [
+  { targetEng: 'I want to eat nasi lemak this morning', words: ['Saya', 'mahu', 'makan', 'nasi', 'lemak', 'pagi', 'ini'] },
+  { targetEng: 'Please make one teh tarik less sweet', words: ['Tolong', 'buat', 'teh', 'tarik', 'satu', 'kurang', 'manis'] },
+  { targetEng: 'Where is the public train station', words: ['Di', 'mana', 'stesen', 'kereta', 'api', 'awam'] },
+  { targetEng: 'Night market durians are cheap and delicious', words: ['Durian', 'pasar', 'malam', 'murah', 'dan', 'sedap'] }
+];
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR
+  const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR | BINA_AYAT
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [flippedCards, setFlippedCards] = useState({});
   
@@ -93,6 +100,18 @@ export default function App() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [quizScore, setQuizScore] = useState(0);
 
+  // Scrambled Sentence Builder State (Tab 5 - Feature 1)
+  const [scrambleIndex, setScrambleIndex] = useState(0);
+  const [scrambledPool, setScrambledPool] = useState([]);
+  const [assembledWords, setAssembledWords] = useState([]);
+  const [isScrambleSolved, setIsScrambleSolved] = useState(false);
+
+  // Live AI Sentence Doctor State (Tab 5 - Feature 3)
+  const [practiceInput, setPracticeInput] = useState('');
+  const [isDoctoring, setIsDoctoring] = useState(false);
+  const [doctorFeedback, setDoctorFeedback] = useState(null);
+  const [doctorError, setDoctorError] = useState('');
+
   useEffect(() => {
     const customOnly = vocabList.filter(v => v.isAI);
     localStorage.setItem('malay_ai_vocab', JSON.stringify(customOnly));
@@ -121,8 +140,18 @@ export default function App() {
     setSelectedAnswer(null);
   }, [quizStep, currentQuizItem, vocabList]);
 
+  // Init scrambled builder puzzle
+  const currentScramble = PRACTICE_SENTENCES[scrambleIndex % PRACTICE_SENTENCES.length];
+  useEffect(() => {
+    if (!currentScramble) return;
+    const pool = [...currentScramble.words].sort(() => 0.5 - Math.random());
+    setScrambledPool(pool.map((w, idx) => ({ id: idx, text: w })));
+    setAssembledWords([]);
+    setIsScrambleSolved(false);
+  }, [scrambleIndex, currentScramble]);
+
   const speakMalay = (e, text) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -136,6 +165,77 @@ export default function App() {
     setFlippedCards(prev => ({ ...prev, [id]: !prev[id] }));
     if (!flippedCards[id]) {
       setXp(x => x + 5);
+    }
+  };
+
+  // Scramble word clicks
+  const handleSelectWord = (item) => {
+    if (isScrambleSolved) return;
+    setScrambledPool(p => p.filter(x => x.id !== item.id));
+    const nextAssembled = [...assembledWords, item];
+    setAssembledWords(nextAssembled);
+
+    // Check solution
+    if (nextAssembled.length === currentScramble.words.length) {
+      const fullSentence = nextAssembled.map(x => x.text).join(' ').toLowerCase();
+      const targetSentence = currentScramble.words.join(' ').toLowerCase();
+      if (fullSentence === targetSentence) {
+        setIsScrambleSolved(true);
+        setXp(x => x + 30);
+        confetti({ particleCount: 65, spread: 80, origin: { y: 0.6 } });
+        speakMalay(null, currentScramble.words.join(' '));
+      }
+    }
+  };
+
+  const handleReturnWord = (item) => {
+    if (isScrambleSolved) return;
+    setAssembledWords(a => a.filter(x => x.id !== item.id));
+    setScrambledPool(p => [...p, item]);
+  };
+
+  // --- AI SENTENCE DOCTOR (Feature 3) ---
+  const handleCheckPracticeSentence = async (e) => {
+    e?.preventDefault();
+    if (!practiceInput.trim()) return;
+
+    setIsDoctoring(true);
+    setDoctorError('');
+    setDoctorFeedback(null);
+
+    try {
+      let resultObj = null;
+      const proxyRes = await fetch('/api/doctor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sentence: practiceInput })
+      }).catch(() => null);
+
+      if (proxyRes && proxyRes.ok) {
+        resultObj = await proxyRes.json();
+      } else {
+        const activeKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gemini_api_key') || '';
+        if (!activeKey) throw new Error("API Key missing");
+
+        const ai = new GoogleGenAI({ apiKey: activeKey });
+        const prompt = `Act as an encouraging KL Bahasa Melayu language coach. Analyze this student sentence: "${practiceInput}".
+Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "feedback": "concise explanation", "nativeBetter": "natural native KL phrasing"}`;
+        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+        let clean = response.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const fB = clean.indexOf('{');
+        const lB = clean.lastIndexOf('}');
+        if (fB !== -1 && lB !== -1) clean = clean.slice(fB, lB + 1);
+        resultObj = JSON.parse(clean);
+      }
+
+      if (resultObj) {
+        setDoctorFeedback(resultObj);
+        setXp(x => x + 15);
+      }
+    } catch {
+      setDoctorError("Could not check sentence right now. Check network.");
+    } finally {
+      setIsDoctoring(false);
     }
   };
 
@@ -232,8 +332,8 @@ CRITICAL GRAMMAR REQUIREMENT: Ensure at least 3 of the 10 generated words showca
 CRITICAL PURITY FILTER: Do NOT include English loan words or obvious cognates (such as boss/bos, meeting/miting, OT/overtime, fail/file, e-mel/email, bank, teksi, ekon). Only generate authentic Malaysian vocabulary where the Malay word is distinct from English.
 Return ONLY a valid raw JSON array of objects. Do not include markdown formatting or backticks. 
 Each object MUST match this schema:
-{"id": number, "category": string, "malay": string, "english": string, "pronunciation": string}
-Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunciation is an easy English phonetic guide.`;
+{"id": number, "category": string, "malay": string, "english": string, "pronunciation": string, "exampleMalay": string, "exampleEnglish": string}
+Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciation is phonetic, and attach practical example sentences.`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -360,6 +460,14 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         </button>
 
         <button 
+          onClick={() => setActiveTab('BINA_AYAT')} 
+          className={`tab-btn ${activeTab === 'BINA_AYAT' ? 'active' : ''}`}
+        >
+          <PenTool size={18} />
+          <span>✍️ Bina Ayat</span>
+        </button>
+
+        <button 
           onClick={() => setActiveTab('DIALOGUE')} 
           className={`tab-btn ${activeTab === 'DIALOGUE' ? 'active' : ''}`}
         >
@@ -482,6 +590,14 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
                     </button>
                     <h3 className="word-eng">{card.english}</h3>
                     <div className="word-pronounce">{card.pronunciation}</div>
+
+                    {/* Feature 2: Flashcard Back Example Sentence Snippet */}
+                    {card.exampleMalay && (
+                      <div className="card-example-box">
+                        <p className="ex-malay">"{card.exampleMalay}"</p>
+                        <p className="ex-eng">{card.exampleEnglish}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -543,7 +659,98 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         </section>
       )}
 
-      {/* --- TAB 3: DIALOGUES --- */}
+      {/* --- TAB 3: BINA AYAT (Feature 1 & Feature 3) --- */}
+      {activeTab === 'BINA_AYAT' && (
+        <section className="bina-ayat-grid">
+          {/* Feature 1: Scrambled Sentence Builder */}
+          <div className="scramble-card">
+            <h3 style={{fontSize: '24px', fontWeight: '950', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span>🧩 Bina Ayat</span>
+              <span style={{fontSize: '11px', background: 'var(--accent-primary)', color: '#000', padding: '3px 10px', borderRadius: '999px'}}>Scrambled Puzzle</span>
+            </h3>
+            <p style={{fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px'}}>Tap word blocks in correct Malay order (Noun before Adjective).</p>
+
+            <div className="scramble-target">
+              Target: "{currentScramble.targetEng}"
+            </div>
+
+            <div className="assembled-area">
+              {assembledWords.length === 0 && <span style={{color: 'var(--text-muted)', fontSize: '14px'}}>Tap tiles below to assemble sentence...</span>}
+              {assembledWords.map(w => (
+                <button key={w.id} onClick={() => handleReturnWord(w)} className="word-block selected">
+                  {w.text}
+                </button>
+              ))}
+            </div>
+
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px', minHeight: '50px'}}>
+              {scrambledPool.map(w => (
+                <button key={w.id} onClick={() => handleSelectWord(w)} className="word-block pool">
+                  + {w.text}
+                </button>
+              ))}
+            </div>
+
+            {isScrambleSolved && (
+              <div style={{textAlign: 'center', padding: '16px', background: 'rgba(16,185,129,0.15)', borderRadius: '18px'}}>
+                <p style={{fontSize: '18px', fontWeight: 'bold', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
+                  <CheckCircle2 size={22} />
+                  <span>Betul! (Correct! +30 XP)</span>
+                </p>
+                <button onClick={() => setScrambleIndex(i => i + 1)} className="ai-btn" style={{margin: '14px auto 0'}}>
+                  <span>Next Sentence</span>
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Feature 3: AI Live Sentence Doctor */}
+          <div className="doctor-card">
+            <h3 style={{fontSize: '24px', fontWeight: '950', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <span>🤖 AI Coach</span>
+              <span style={{fontSize: '11px', background: 'var(--accent-secondary)', color: '#000', padding: '3px 10px', borderRadius: '999px'}}>Sentence Doctor</span>
+            </h3>
+            <p style={{fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px'}}>Type any practice sentence to get KL conversational coaching (~80 tokens).</p>
+
+            <form onSubmit={handleCheckPracticeSentence} style={{marginTop: '20px'}}>
+              <textarea
+                rows={3}
+                value={practiceInput}
+                onChange={(e) => setPracticeInput(e.target.value)}
+                placeholder="Type your practice Malay sentence here (e.g. Saya nak pergi pasar malam beli ayam)..."
+                style={{width: '100%', background: 'var(--input-bg)', border: '2px solid var(--glass-border)', borderRadius: '18px', padding: '16px', color: 'var(--text-main)', fontSize: '15px', fontWeight: 'bold', outline: 'none', resize: 'none', fontFamily: 'inherit'}}
+              />
+              <button disabled={isDoctoring || !practiceInput.trim()} type="submit" className="ai-btn" style={{width: '100%', justifyContent: 'center', marginTop: '16px', background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-teal) 100%)', color: '#000'}}>
+                {isDoctoring ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                <span>Check My Sentence</span>
+              </button>
+            </form>
+
+            {doctorError && <p style={{color: '#f43f5e', fontSize: '13px', marginTop: '12px'}}>⚠️ {doctorError}</p>}
+
+            {doctorFeedback && (
+              <div className="doctor-result-box">
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+                  <span style={{fontSize: '14px', fontWeight: '950', color: doctorFeedback.rating >= 7 ? '#10b981' : '#f59e0b'}}>
+                    Fluency Score: {doctorFeedback.rating}/10
+                  </span>
+                  <span style={{fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)'}}>+15 XP</span>
+                </div>
+                <p style={{fontSize: '14px', color: 'var(--text-main)', marginBottom: '12px'}}>
+                  {doctorFeedback.feedback}
+                </p>
+                <div style={{padding: '12px', background: 'rgba(0,210,196,0.12)', borderRadius: '12px'}}>
+                  <span style={{fontSize: '11px', color: 'var(--accent-primary)', fontWeight: '950', textTransform: 'uppercase', display: 'block'}}>Native KL Phrasing:</span>
+                  <p style={{fontSize: '16px', fontWeight: '900', color: '#fff', marginTop: '2px'}}>"{doctorFeedback.nativeBetter}"</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* --- TAB 4: DIALOGUES --- */}
       {activeTab === 'DIALOGUE' && (
         <section>
           {DIALOGUES.map((dlg, idx) => (
@@ -574,7 +781,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
         </section>
       )}
 
-      {/* --- TAB 4: GRAMMAR --- */}
+      {/* --- TAB 5: GRAMMAR --- */}
       {activeTab === 'GRAMMAR' && (
         <section className="grammar-grid">
           <div className="grammar-rule-card">
