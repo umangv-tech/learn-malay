@@ -709,10 +709,10 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleStar(card.id); }} 
-                      style={{position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10, padding: '4px'}}
+                      style={{position: 'absolute', top: '16px', left: '16px', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10, padding: '6px'}}
                       title={starredIds.includes(card.id) ? "Unstar word" : "Star word as hard"}
                     >
-                      <Star size={20} fill={starredIds.includes(card.id) ? "#f59e0b" : "none"} color={starredIds.includes(card.id) ? "#f59e0b" : "var(--text-muted)"} />
+                      <Star size={22} fill={starredIds.includes(card.id) ? "#f59e0b" : "none"} color={starredIds.includes(card.id) ? "#f59e0b" : "var(--text-muted)"} />
                     </button>
                     <span style={{fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', display: 'block'}}>
                       {card.category}
@@ -723,6 +723,13 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
                   <div className="flip-card-back">
                     <button onClick={(e) => speakMalay(e, card.malay)} className="audio-btn" style={{background: 'rgba(0,0,0,0.3)'}}>
                       <Volume2 size={18} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleStar(card.id); }} 
+                      style={{position: 'absolute', top: '16px', left: '16px', background: 'transparent', border: 'none', cursor: 'pointer', zIndex: 10, padding: '6px'}}
+                      title={starredIds.includes(card.id) ? "Unstar word" : "Star word as hard"}
+                    >
+                      <Star size={22} fill={starredIds.includes(card.id) ? "#f59e0b" : "none"} color={starredIds.includes(card.id) ? "#f59e0b" : "var(--text-muted)"} />
                     </button>
                     <h3 className="word-eng">{card.english}</h3>
                     <div className="word-pronounce">{card.pronunciation}</div>
