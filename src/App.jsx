@@ -61,7 +61,7 @@ const PRACTICE_SENTENCES = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR | BINA_AYAT
-  const [activeProfile, setActiveProfile] = useState(() => localStorage.getItem('malay_active_prof') || 'UMANG'); // UMANG | WIFE
+  const [activeProfile, setActiveProfile] = useState(() => localStorage.getItem('malay_active_prof') || 'UMANG'); // UMANG | ARCHANA
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [flippedCards, setFlippedCards] = useState({});
   
@@ -70,8 +70,10 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-profile', activeProfile);
     localStorage.setItem('malay_theme', theme);
-  }, [theme]);
+    localStorage.setItem('malay_active_prof', activeProfile);
+  }, [theme, activeProfile]);
 
   // Dynamic Vocab List
   const [vocabList, setVocabList] = useState(() => {
@@ -506,6 +508,31 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
 
   return (
     <div className="app-shell">
+      {/* Dynamic Family Profile Island Ribbon Banner */}
+      <div style={{background: activeProfile === 'UMANG' ? 'linear-gradient(90deg, #090e17, #0d9488)' : 'linear-gradient(90deg, #380a1e, #be123c)', padding: '12px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.18)', transition: 'all 0.35s ease'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+          <span style={{fontSize: '24px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
+          <div>
+            <span style={{fontSize: '10px', textTransform: 'uppercase', opacity: 0.85, display: 'block', letterSpacing: '1px', fontWeight: '900'}}>Active Learner Profile</span>
+            <span style={{fontSize: '17px', fontWeight: '950', color: activeProfile === 'UMANG' ? '#00d2c4' : '#fbcfe8'}}>{activeProfile === 'UMANG' ? "Umang's Studio" : "Archana's Studio"}</span>
+          </div>
+        </div>
+
+        <button 
+          onClick={() => {
+            const next = activeProfile === 'UMANG' ? 'ARCHANA' : 'UMANG';
+            setActiveProfile(next);
+            localStorage.setItem('malay_active_prof', next);
+            confetti({ particleCount: 50, spread: 70, origin: { y: 0.1 } });
+          }}
+          style={{background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.4)', padding: '8px 18px', borderRadius: '999px', color: '#fff', fontWeight: '950', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'}}
+          title="Click to switch between Umang and Archana"
+        >
+          <Users size={14} />
+          <span>Switch to {activeProfile === 'UMANG' ? '👩 Archana' : '👨 Umang'}</span>
+        </button>
+      </div>
+
       {/* Header Banner - Royal Emerald & Malacca Gold */}
       <header className="header-banner">
         <div className="title-area">
@@ -513,7 +540,7 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             <span className="flag-badge">🇲🇾</span>
             <span>Bahasa Melayu</span>
           </h1>
-          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap'}}>
+          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
             <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
             <span style={{opacity: 0.3}}>|</span>
             <button 
@@ -523,20 +550,6 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             >
               <Download size={12} />
               <span>Export CSV</span>
-            </button>
-            <span style={{opacity: 0.3}}>|</span>
-            <button 
-              onClick={() => {
-                const next = activeProfile === 'UMANG' ? 'WIFE' : 'UMANG';
-                setActiveProfile(next);
-                localStorage.setItem('malay_active_prof', next);
-                confetti({ particleCount: 30, spread: 60, origin: { y: 0.2 } });
-              }}
-              style={{background: 'var(--pill-bg)', border: '1px solid var(--glass-border)', padding: '3px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: 'bold', color: activeProfile === 'UMANG' ? '#00d2c4' : '#f59e0b', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px'}}
-              title="Switch family profile"
-            >
-              <Users size={12} />
-              <span>Profile: {activeProfile === 'UMANG' ? '👨 Umang' : '👩 Wife'}</span>
             </button>
           </div>
         </div>

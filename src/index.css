@@ -30,6 +30,26 @@
   --pill-bg: #e2e8f0;
 }
 
+/* Profile Archana Override - Royal Rose & Amethyst Sunset */
+:root[data-profile="ARCHANA"][data-theme="dark"] {
+  --bg-main: #180b1e;
+  --bg-card: #261131;
+  --accent-primary: #f43f5e;
+  --accent-secondary: #fbbf24;
+  --glass-border: rgba(244, 63, 94, 0.35);
+  --card-shadow: 0 20px 45px -15px rgba(0,0,0,0.8), 0 0 60px rgba(244, 63, 94, 0.15);
+  --banner-grad: linear-gradient(135deg, #2e133a 0%, #180b1e 100%);
+}
+
+:root[data-profile="ARCHANA"][data-theme="light"] {
+  --bg-main: #fff1f2;
+  --bg-card: #ffffff;
+  --accent-primary: #e11d48;
+  --accent-secondary: #d97706;
+  --glass-border: rgba(225, 29, 72, 0.25);
+  --banner-grad: linear-gradient(135deg, #ffffff 0%, #ffe4e6 100%);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
