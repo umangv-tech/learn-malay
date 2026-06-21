@@ -561,50 +561,56 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
           </div>
         </div>
 
-        <div className="stats-bar" style={{alignItems: 'center'}}>
-          <button 
-            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-            className="theme-toggle-btn"
-          >
-            {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
-            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
-          </button>
+        <div style={{display: 'flex', alignItems: 'center', gap: '28px'}}>
+          <div className="stats-bar" style={{alignItems: 'center', margin: 0}}>
+            <button 
+              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+              className="theme-toggle-btn"
+            >
+              {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#0d9488" />}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
 
-          <div className="stat-chip">
-            <Target size={20} color="#10b981" />
-            <div>
-              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Daily Goal</span>
-              <span className="stat-num" style={{color: dailyGoal >= 10 ? '#10b981' : 'var(--text-main)'}}>{Math.min(dailyGoal, 10)}/10 {dailyGoal >= 10 ? '✓' : ''}</span>
+            <div className="stat-chip">
+              <Target size={20} color="#10b981" />
+              <div>
+                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Daily Goal</span>
+                <span className="stat-num" style={{color: dailyGoal >= 10 ? '#10b981' : 'var(--text-main)'}}>{Math.min(dailyGoal, 10)}/10 {dailyGoal >= 10 ? '✓' : ''}</span>
+              </div>
+            </div>
+
+            <div className="stat-chip">
+              <Flame size={20} color="var(--accent-secondary)" />
+              <div>
+                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Streak</span>
+                <span className="stat-num">{streak} Days</span>
+              </div>
+            </div>
+
+            <div className="stat-chip">
+              <Award size={20} color="var(--accent-primary)" />
+              <div>
+                <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>XP</span>
+                <span className="stat-num teal">{xp} XP</span>
+              </div>
             </div>
           </div>
 
-          <div className="stat-chip">
-            <Flame size={20} color="var(--accent-secondary)" />
-            <div>
-              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>Streak</span>
-              <span className="stat-num">{streak} Days</span>
-            </div>
+          {/* Dedicated Far Right Identity Nook (Executive Desktop Layout) */}
+          <div style={{borderLeft: '1px solid var(--glass-border)', paddingLeft: '24px', display: 'flex', alignItems: 'center'}}>
+            <button 
+              type="button"
+              onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
+              style={{background: activeProfile === 'UMANG' ? 'linear-gradient(135deg, #00d2c4, #0d9488)' : 'linear-gradient(135deg, #a855f7, #7e22ce)', color: activeProfile === 'UMANG' ? '#000' : '#fff', border: 'none', padding: '8px 18px', borderRadius: '999px', fontWeight: '950', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 14px rgba(0,0,0,0.35)', transition: 'transform 0.15s ease'}}
+              title="Lock workspace and return to Netflix profile selection portal"
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <span style={{fontSize: '18px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
+              <span>{activeProfile === 'UMANG' ? 'Umang' : 'Archana'}</span>
+              <Lock size={14} style={{opacity: 0.85}} />
+            </button>
           </div>
-
-          <div className="stat-chip">
-            <Award size={20} color="var(--accent-primary)" />
-            <div>
-              <span style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', display: 'block'}}>XP</span>
-              <span className="stat-num teal">{xp} XP</span>
-            </div>
-          </div>
-
-          {/* Prominent Profile Signature Lock Badge (Far Right) */}
-          <button 
-            type="button"
-            onClick={() => { setActiveProfile(null); localStorage.removeItem('malay_active_prof'); }}
-            style={{background: activeProfile === 'UMANG' ? 'linear-gradient(135deg, #00d2c4, #0d9488)' : 'linear-gradient(135deg, #a855f7, #7e22ce)', color: activeProfile === 'UMANG' ? '#000' : '#fff', border: 'none', padding: '7px 16px', borderRadius: '999px', fontWeight: '950', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', marginLeft: '8px'}}
-            title="Lock workspace and return to Netflix profile selection portal"
-          >
-            <span style={{fontSize: '16px'}}>{activeProfile === 'UMANG' ? '👨' : '👩'}</span>
-            <span>{activeProfile === 'UMANG' ? 'Umang' : 'Archana'}</span>
-            <Lock size={14} style={{opacity: 0.85}} />
-          </button>
         </div>
       </header>
 
