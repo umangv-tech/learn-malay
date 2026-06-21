@@ -493,21 +493,21 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
             <span className="flag-badge">🇲🇾</span>
             <span>Bahasa Melayu</span>
           </h1>
-          <p style={{color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px'}}>
-            Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong>
-          </p>
+          <div style={{color: 'var(--text-muted)', fontSize: '13px', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '10px'}}>
+            <span>Active Library: <strong style={{color: 'var(--accent-secondary)'}}>{vocabList.length} Words</strong></span>
+            <span>&bull;</span>
+            <button 
+              onClick={handleExportCsv}
+              style={{background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'underline', cursor: 'pointer', opacity: 0.65, padding: 0, display: 'inline-flex', alignItems: 'center', gap: '4px'}}
+              title="Export backup to Excel/CSV"
+            >
+              <Download size={12} />
+              <span>Export CSV</span>
+            </button>
+          </div>
         </div>
 
         <div className="stats-bar">
-          <button 
-            onClick={handleExportCsv}
-            className="theme-toggle-btn"
-            style={{color: 'var(--accent-secondary)'}}
-            title="Export dictionary to Excel/CSV"
-          >
-            <Download size={16} />
-            <span>Export CSV</span>
-          </button>
 
           <button 
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
