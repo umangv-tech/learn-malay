@@ -59,6 +59,17 @@ const PRACTICE_SENTENCES = [
   { level: 'Advanced', targetEng: 'Please make one teh tarik less sweet', words: ['Tolong', 'buat', 'teh', 'tarik', 'satu', 'kurang', 'manis'] }
 ];
 
+const deduplicateWords = (words) => {
+  const seen = new Set();
+  return words.filter(w => {
+    if (!w.malay) return false;
+    const val = w.malay.toLowerCase().trim();
+    if (seen.has(val)) return false;
+    seen.add(val);
+    return true;
+  });
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('VOCAB'); // VOCAB | QUIZ | DIALOGUE | GRAMMAR | BINA_AYAT
   const [activeProfile, setActiveProfile] = useState(() => localStorage.getItem('malay_active_prof') || 'UMANG'); // UMANG | ARCHANA
@@ -81,12 +92,12 @@ export default function App() {
     if (savedAIWords) {
       try {
         const parsed = JSON.parse(savedAIWords);
-        return [...parsed, ...BASE_VOCAB];
+        return deduplicateWords([...parsed, ...BASE_VOCAB]);
       } catch (e) {
         console.error("Failed parsing saved AI words", e);
       }
     }
-    return BASE_VOCAB;
+    return deduplicateWords(BASE_VOCAB);
   });
 
   // AI Generation Modal & State
@@ -179,9 +190,9 @@ export default function App() {
     const pk = `_${activeProfile}`;
     const savedAIWords = localStorage.getItem(`malay_ai_vocab${pk}`);
     if (savedAIWords) {
-      try { setVocabList([...JSON.parse(savedAIWords), ...BASE_VOCAB]); }
-      catch { setVocabList(BASE_VOCAB); }
-    } else { setVocabList(BASE_VOCAB); }
+      try { setVocabList(deduplicateWords([...JSON.parse(savedAIWords), ...BASE_VOCAB])); }
+      catch { setVocabList(deduplicateWords(BASE_VOCAB)); }
+    } else { setVocabList(deduplicateWords(BASE_VOCAB)); }
 
     const savedXp = localStorage.getItem(`malay_xp${pk}`);
     setXp(savedXp !== null ? parseInt(savedXp, 10) : (activeProfile === 'UMANG' ? 150 : 0));
@@ -404,11 +415,12 @@ Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "fee
 
     try {
       let generatedArray = [];
+      const existingMalay = vocabList.map(v => v.malay.trim());
 
       const proxyRes = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: targetTopic })
+        body: JSON.stringify({ topic: targetTopic, existingWords: existingMalay })
       }).catch(() => null);
 
       if (proxyRes && proxyRes.ok) {
@@ -419,7 +431,10 @@ Return ONLY raw JSON: {"rating": number (1-10 scale), "isCorrect": boolean, "fee
         if (!activeKey) throw new Error("API Key missing");
 
         const ai = new GoogleGenAI({ apiKey: activeKey });
-        const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${targetTopic}". 
+        const exclusionPrompt = existingMalay.length > 0 
+          ? `\nCRITICAL DUPLICATION RULE: Do NOT generate any of the following existing Malay words or phrases: ${JSON.stringify(existingMalay)}. All generated words must be unique and entirely new.`
+          : '';
+        const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${targetTopic}".${exclusionPrompt}
 CRITICAL GRAMMAR REQUIREMENT: Ensure at least 3 of the 10 generated words showcase classic Malaysian reduplication (Kata Ganda - such as Kata Ganda Penuh [e.g. anak-anak], Kata Ganda Separa [e.g. jejari, lelangit], or Kata Ganda Berentak [e.g. kuih-muih, gotong-royong]).
 CRITICAL PURITY FILTER: Do NOT include English loan words or obvious cognates (such as boss/bos, meeting/miting, OT/overtime, fail/file, e-mel/email, bank, teksi, ekon). Only generate authentic Malaysian vocabulary where the Malay word is distinct from English.
 Return ONLY a valid raw JSON array of objects. Do not include markdown formatting or backticks. 
@@ -442,7 +457,16 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
         }
 
         const parsed = JSON.parse(rawText);
-        generatedArray = parsed.map((item, idx) => ({
+        const normalizedExisting = new Set(existingMalay.map(w => w.toLowerCase().trim()));
+        const uniqueNew = parsed.filter(w => {
+          if (!w.malay) return false;
+          const val = w.malay.toLowerCase().trim();
+          if (normalizedExisting.has(val)) return false;
+          normalizedExisting.add(val);
+          return true;
+        });
+
+        generatedArray = uniqueNew.map((item, idx) => ({
           ...item,
           id: Date.now() + idx,
           isAI: true
@@ -450,17 +474,27 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday'), pronunciat
       }
 
       if (Array.isArray(generatedArray) && generatedArray.length > 0) {
-        setVocabList(prev => [...generatedArray, ...prev]);
+        setVocabList(prev => {
+          const existingMap = new Map(prev.map(v => [v.malay.toLowerCase().trim(), v]));
+          const uniqueNew = generatedArray.filter(v => {
+            if (!v.malay) return false;
+            const normalized = v.malay.toLowerCase().trim();
+            if (existingMap.has(normalized)) return false;
+            existingMap.set(normalized, v);
+            return true;
+          });
+          return [...uniqueNew, ...prev];
+        });
         setSelectedCategory('ALL');
         setIsAiModalOpen(false);
         setXp(x => x + 50);
         confetti({ particleCount: 60, spread: 70, origin: { y: 0.5 } });
       } else {
-        throw new Error("Invalid structure.");
+        throw new Error("No new words generated.");
       }
     } catch (err) {
       console.error(err);
-      setAiError("Could not generate words. Try again.");
+      setAiError(err.message || "Could not generate words. Try again.");
     } finally {
       setIsGenerating(false);
     }

@@ -12,11 +12,15 @@ export default async function handler(req, res) {
     });
   }
 
-  const { topic = 'Random Practical Everyday Malaysian Words' } = req.body || {};
+  const { topic = 'Random Practical Everyday Malaysian Words', existingWords = [] } = req.body || {};
+  const normalizedExisting = new Set(existingWords.map(w => w.toLowerCase().trim()));
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${topic}". 
+    const exclusionPrompt = normalizedExisting.size > 0 
+      ? `\nCRITICAL DUPLICATION RULE: Do NOT generate any of the following Malay words/phrases under any circumstance: ${JSON.stringify(Array.from(normalizedExisting))}. Ensure all 10 words are completely distinct from this list.`
+      : '';
+    const prompt = `Generate exactly 10 practical, commonly used Malay words or short daily phrases for conversational fluency in Malaysia. Theme or Focus: "${topic}".${exclusionPrompt}
 CRITICAL GRAMMAR REQUIREMENT: Ensure at least 3 of the 10 generated words showcase classic Malaysian reduplication (Kata Ganda - such as Kata Ganda Penuh [e.g. anak-anak], Kata Ganda Separa [e.g. jejari, lelangit], or Kata Ganda Berentak [e.g. kuih-muih, gotong-royong]).
 CRITICAL PURITY FILTER: Do NOT include English loan words or obvious cognates (such as boss/bos, meeting/miting, OT/overtime, fail/file, e-mel/email, bank, teksi, ekon). Only generate authentic Malaysian vocabulary where the Malay word is distinct from English.
 Return ONLY a valid raw JSON array of objects. Do not include markdown formatting or backticks. 
@@ -44,7 +48,18 @@ Ensure category is concise (e.g. 'AI: Kata Ganda' or 'AI: Everyday') and pronunc
       throw new Error("AI returned invalid array structure.");
     }
 
-    const words = parsedWords.map((w, idx) => ({
+    // Filter duplicates locally in the API response as a safety measure
+    const uniqueParsed = parsedWords.filter(w => {
+      if (!w.malay) return false;
+      const val = w.malay.toLowerCase().trim();
+      if (normalizedExisting.has(val)) {
+        return false;
+      }
+      normalizedExisting.add(val);
+      return true;
+    });
+
+    const words = uniqueParsed.map((w, idx) => ({
       ...w,
       id: Date.now() + idx,
       isAI: true
